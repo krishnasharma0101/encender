@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: "Encender - Customized Gifting Made Easy",
   description: "Explore our unique selection of customized gifts delivered across India for every special occasion. Quality gifting with customer satisfaction.",
   keywords: "customized gifts, personalized gifts, gifting India, special occasions, handicrafts, custom designs",
+  icons: {
+    icon: '/encender.svg',
+    shortcut: '/encender.svg',
+    apple: '/encender.svg',
+  },
 };
 
 export default function RootLayout({

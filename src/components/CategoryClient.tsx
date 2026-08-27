@@ -1,98 +1,77 @@
 "use client";
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { notFound } from 'next/navigation';
+import { fetchDirectusData } from '@/lib/fetchWithRetry';
+import { getAssetUrl, getCategorySlug } from '@/lib/directus';
 
-const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
-
-const CATEGORY_TREE = [
-  {
-    label: 'Gifting',
-    children: [
-      { label: 'festive gifting' },
-      { label: 'Hampers' },
-      {
-        label: 'Personalized',
-        children: [
-          { label: 'Birthday gifting' },
-          { label: 'Anniversary gifting' },
-          { label: 'Wedding gifting' },
-          { label: 'Housewarming' },
-        ],
-      },
-      { label: 'Corporate gifting' },
-    ],
-  },
-  {
-    label: 'Jewellery',
-    children: [
-      { label: 'necklace' },
-      { label: 'Bracelet' },
-      { label: 'Earrings' },
-      { label: 'Finger ring' },
-      { label: 'anklet' },
-    ],
-  },
-  { label: 'Pooja Essentials' },
-  { label: 'Interior' },
-  { label: 'Back To School' },
-  { label: 'Daily Essentials' },
-];
-
-function flattenCategories(tree: any, prefix = ''): string[] {
-  let result: string[] = [];
-  for (const node of tree) {
-    const path = prefix ? `${prefix} > ${node.label}` : node.label;
-    result.push(path);
-    if (node.children) {
-      result = result.concat(flattenCategories(node.children, path));
-    }
-  }
-  return result;
-}
+const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || '';
 
 export default function CategoryClient({ category }: { category: string }) {
   const categoryDisplay = category.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sort, setSort] = useState('default');
 
-  // Find the relevant category node
-  const categoryNode = useMemo(() => CATEGORY_TREE.find(cat => cat.label.toLowerCase() === categoryDisplay.toLowerCase()), [categoryDisplay]);
-  const filterTree = categoryNode && categoryNode.children ? categoryNode.children : [];
-  const allCategories = useMemo(() => flattenCategories(filterTree), [filterTree]);
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const { data, error: fetchError } = await fetchDirectusData<any[]>(
+      `${DIRECTUS_URL}/items/Products?limit=-1&fields=*,images.*`
+    );
+
+    if (fetchError || !data) {
+      setError(fetchError || 'Failed to load products');
+      setLoading(false);
+      return;
+    }
+
+    if (Array.isArray(data)) {
+      const filtered = data.filter((item) => {
+        if (!item.category) return false;
+        const cats: string[] = Array.isArray(item.category)
+          ? item.category
+          : typeof item.category === 'string'
+            ? item.category.startsWith('[') && item.category.endsWith(']')
+              ? (() => { try { return JSON.parse(item.category); } catch { return [item.category]; } })()
+              : item.category.split(',').map((c: string) => c.trim())
+            : [String(item.category)];
+
+        return Array.isArray(cats) && cats.some((cat: string) => {
+          if (!cat || typeof cat !== 'string') return false;
+          const trimmed = cat.trim();
+          return (
+            getCategorySlug(trimmed) === category.toLowerCase() ||
+            trimmed.toLowerCase() === categoryDisplay.toLowerCase() ||
+            trimmed.toLowerCase().includes(category.toLowerCase()) ||
+            category.toLowerCase().includes(trimmed.toLowerCase())
+          );
+        });
+      }).map((item) => {
+        const imageIds = Array.isArray(item.images)
+          ? item.images.map((img: { directus_files_id: string }) => img.directus_files_id).filter(Boolean)
+          : [];
+        return {
+          ...item,
+          price: typeof item.Discounter_price === 'number' ? item.Discounter_price : Number(item.Discounter_price) || 0,
+          image: imageIds.length > 0 ? getAssetUrl(imageIds[0]) : '',
+          images: imageIds.map((id: string) => getAssetUrl(id)),
+          category: item.category,
+          allow_inquire: !!item.allow_inquire,
+        };
+      });
+      setAllProducts(filtered);
+    }
+    setLoading(false);
+  }, [category, categoryDisplay]);
 
   useEffect(() => {
-    async function fetchProducts() {
-      const res = await fetch(`${DIRECTUS_URL}/items/Products?limit=100&fields=*,images.*`);
-      const { data } = await res.json();
-      if (Array.isArray(data)) {
-        const filtered = data.filter((item) =>
-          Array.isArray(item.category)
-            ? item.category.some((cat: string) => cat.toLowerCase() === categoryDisplay.toLowerCase())
-            : false
-        ).map((item) => {
-          const images = Array.isArray(item.images)
-            ? item.images.map((img: { directus_files_id: string }) => img.directus_files_id).filter(Boolean)
-            : [];
-          return {
-            ...item,
-            price: typeof item.Discounter_price === 'number' ? item.Discounter_price : Number(item.Discounter_price) || 0,
-            image: images.length > 0 ? `${DIRECTUS_URL}/assets/${images[0]}` : '',
-            images: images.map((id: string) => `${DIRECTUS_URL}/assets/${id}`),
-            category: item.category,
-          };
-        });
-        setAllProducts(filtered);
-      }
-      setLoading(false);
-    }
     fetchProducts();
-  }, [categoryDisplay]);
+  }, [fetchProducts]);
 
   // Filtering logic
   const filteredProducts = useMemo(() => {
@@ -103,48 +82,12 @@ export default function CategoryClient({ category }: { category: string }) {
         (p as any).description && (p as any).description.toLowerCase().includes(search.toLowerCase())
       );
     }
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(p =>
-        Array.isArray(p.category) && selectedCategories.some(cat => p.category.includes(cat))
-      );
-    }
     if (sort === 'price-asc') filtered = [...filtered].sort((a, b) => a.price - b.price);
     if (sort === 'price-desc') filtered = [...filtered].sort((a, b) => b.price - a.price);
     if (sort === 'name-asc') filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
     if (sort === 'name-desc') filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name));
     return filtered;
-  }, [allProducts, search, selectedCategories, sort]);
-
-  function renderCategoryTree(tree: any, prefix = ''): React.ReactNode {
-    return (
-      <ul className="pl-2">
-        {tree.map((node: any) => {
-          const path = prefix ? `${prefix} > ${node.label}` : node.label;
-          const checked = selectedCategories.includes(path);
-          return (
-            <li key={path} className="mb-1">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => {
-                    setSelectedCategories(checked
-                      ? selectedCategories.filter(c => c !== path)
-                      : [...selectedCategories, path]);
-                  }}
-                />
-                {node.label}
-              </label>
-              {node.children && renderCategoryTree(node.children, path)}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (!loading && (!allProducts || allProducts.length === 0)) return notFound();
+  }, [allProducts, search, sort]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,25 +98,11 @@ export default function CategoryClient({ category }: { category: string }) {
             {categoryDisplay}
           </h1>
           <p className="text-gray-600">
-            Discover our collection of {allProducts.length} products in this category
+            {loading ? 'Loading products...' : `Discover our collection of ${allProducts.length} products in this category`}
           </p>
         </div>
-        <div className="flex gap-8">
-          {/* Sidebar filter */}
-          {filterTree.length > 0 && (
-            <aside className="w-64 bg-white rounded shadow p-4 h-fit">
-              <div className="font-semibold mb-2">Filters</div>
-              {renderCategoryTree(filterTree)}
-              <button
-                className="mt-4 text-xs text-indigo-600 hover:underline"
-                onClick={() => setSelectedCategories([])}
-                disabled={selectedCategories.length === 0}
-              >
-                Clear All
-              </button>
-            </aside>
-          )}
-          <section className="flex-1">
+        <div>
+          <section className="w-full">
             {/* Search and sort bar */}
             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
               <input
@@ -195,19 +124,50 @@ export default function CategoryClient({ category }: { category: string }) {
                 <option value="name-desc">Name: Z-A</option>
               </select>
             </div>
-            {filteredProducts.length === 0 ? (
-              <div>No products found in this category.</div>
-            ) : (
+
+            {/* Loading State */}
+            {loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="bg-gray-100 rounded-lg h-64 animate-pulse" />
+                ))}
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-4">Unable to load products. Please check your connection and try again.</p>
+                <button
+                  onClick={fetchProducts}
+                  className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* No products */}
+            {!loading && !error && allProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-4">No products found in this category yet.</p>
+              </div>
+            )}
+
+            {/* Products */}
+            {!loading && !error && filteredProducts.length === 0 && allProducts.length > 0 ? (
+              <div>No products match your search.</div>
+            ) : !loading && !error && filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredProducts.map((product: any) => (
                   <ProductCard key={product.id + categoryDisplay} product={product} />
                 ))}
               </div>
-            )}
+            ) : null}
           </section>
         </div>
       </main>
       <Footer />
     </div>
   );
-} 
+}

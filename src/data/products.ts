@@ -14,6 +14,11 @@ export interface Product {
   inStock: boolean;
   tags: string[];
   is_for_homepage?: boolean;
+  allow_inquire?: boolean;
+  material?: string;
+  coating?: string;
+  makers_note?: string;
+  craftsmanship_description?: string;
 }
 
 export const products: Product[] = [

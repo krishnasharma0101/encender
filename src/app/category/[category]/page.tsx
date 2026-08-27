@@ -1,5 +1,9 @@
-import CategoryClient from '@/components/CategoryClient';
+import NewUICategoryPage from '@/app/new-ui/category/[category]/page';
 
-export default function CategoryPage(props: any) {
-  return <CategoryClient category={props.params.category} />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
+  return <NewUICategoryPage params={params} />;
 }

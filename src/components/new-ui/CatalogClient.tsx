@@ -8,6 +8,7 @@ import { getAssetUrl, getCategorySlug } from '@/lib/directus';
 
 import { REAL_PRODUCTS } from '@/data/realProducts';
 import { addToCart } from '@/lib/cart';
+import { getWishlist, toggleWishlist as toggleWishlistStorage } from '@/lib/wishlist';
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '') : '';
 
@@ -101,9 +102,28 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
     loadProducts();
   }, [loadProducts]);
 
+  // Sync wishlist from storage
+  useEffect(() => {
+    const syncWishlist = () => {
+      const ids = getWishlist();
+      const map: Record<string, boolean> = {};
+      ids.forEach((id) => {
+        map[id] = true;
+      });
+      setWishlist(map);
+    };
+    syncWishlist();
+    window.addEventListener('wishlist-updated', syncWishlist);
+    window.addEventListener('storage', syncWishlist);
+    return () => {
+      window.removeEventListener('wishlist-updated', syncWishlist);
+      window.removeEventListener('storage', syncWishlist);
+    };
+  }, []);
+
   // Handle wishlist toggle
   const toggleWishlist = (id: string) => {
-    setWishlist((prev) => ({ ...prev, [id]: !prev[id] }));
+    toggleWishlistStorage(id);
   };
 
   // Clear all active filters

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 export default function Navbar() {
   const pathname = usePathname() || '';
   const [cartCount, setCartCount] = useState<number>(0);
+  const [wishlistCount, setWishlistCount] = useState<number>(0);
 
   useEffect(() => {
     const updateCount = () => {
@@ -20,12 +21,29 @@ export default function Navbar() {
         setCartCount(0);
       }
     };
+    const updateWishlist = () => {
+      if (typeof window === 'undefined') return;
+      try {
+        const stored = localStorage.getItem('wishlist');
+        const parsed = stored ? JSON.parse(stored) : [];
+        setWishlistCount(Array.isArray(parsed) ? parsed.length : 0);
+      } catch {
+        setWishlistCount(0);
+      }
+    };
+
     updateCount();
+    updateWishlist();
+
     window.addEventListener('cart-updated', updateCount);
+    window.addEventListener('wishlist-updated', updateWishlist);
     window.addEventListener('storage', updateCount);
+    window.addEventListener('storage', updateWishlist);
     return () => {
       window.removeEventListener('cart-updated', updateCount);
+      window.removeEventListener('wishlist-updated', updateWishlist);
       window.removeEventListener('storage', updateCount);
+      window.removeEventListener('storage', updateWishlist);
     };
   }, []);
 
@@ -103,9 +121,18 @@ export default function Navbar() {
 
           {/* Header Action Icons (Right side) */}
           <div className="flex items-center space-x-2 sm:space-x-4 text-[#855300]">
-            <button className="hover:text-[#f59e0b] p-1.5 rounded-lg active:bg-gray-100" aria-label="Favorites">
+            <Link
+              href="/wishlist"
+              className="hover:text-[#f59e0b] p-1.5 rounded-lg active:bg-gray-100 relative"
+              aria-label="Favorites"
+            >
               <span className="material-symbols-outlined text-xl sm:text-2xl block">favorite</span>
-            </button>
+              {wishlistCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 bg-rose-500 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in duration-200 pointer-events-none">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </Link>
             <Link href="/account" className="hover:text-[#f59e0b] p-1.5 rounded-lg active:bg-gray-100" aria-label="User Account">
               <span className="material-symbols-outlined text-xl sm:text-2xl block">person</span>
             </Link>

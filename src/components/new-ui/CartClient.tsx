@@ -80,18 +80,20 @@ export default function CartClient() {
     setCartItems((prev) => {
       const updated = prev
         .map((item) => {
-          if (item.id === id) {
-            const newQty = Math.max(1, item.quantity + delta);
+          if (String(item.id) === String(id)) {
+            const newQty = item.quantity + delta;
+            if (newQty <= 0) return null;
             return { ...item, quantity: newQty };
           }
           return item;
         })
-        .filter(Boolean);
+        .filter((item): item is NonNullable<typeof item> => item !== null);
 
       // Persist to localStorage
       if (typeof window !== 'undefined') {
         const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
         localStorage.setItem('cart', JSON.stringify(stored));
+        window.dispatchEvent(new Event('cart-updated'));
       }
       return updated;
     });
@@ -99,10 +101,11 @@ export default function CartClient() {
 
   const removeItem = (id: string) => {
     setCartItems((prev) => {
-      const updated = prev.filter((item) => item.id !== id);
+      const updated = prev.filter((item) => String(item.id) !== String(id));
       if (typeof window !== 'undefined') {
         const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
         localStorage.setItem('cart', JSON.stringify(stored));
+        window.dispatchEvent(new Event('cart-updated'));
       }
       return updated;
     });
@@ -137,6 +140,7 @@ export default function CartClient() {
       if (typeof window !== 'undefined') {
         const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
         localStorage.setItem('cart', JSON.stringify(stored));
+        window.dispatchEvent(new Event('cart-updated'));
       }
       return updated;
     });

@@ -47,14 +47,16 @@ export default function CartClient() {
       return;
     }
 
-    // Map items from REAL_PRODUCTS dataset
-    const mergedItems = rawCart
-      .map((cItem) => {
-        const found = REAL_PRODUCTS.find((p: any) => String(p.id) === String(cItem.id));
-        if (!found) return null;
+    const mergedItems: any[] = [];
+    const missingIds: string[] = [];
+
+    // 1. Check local REAL_PRODUCTS dataset first
+    rawCart.forEach((cItem) => {
+      const found = REAL_PRODUCTS.find((p: any) => String(p.id) === String(cItem.id));
+      if (found) {
         const catArray = Array.isArray(found.category) ? found.category : [found.category || 'Gifting'];
         const image = found.images && found.images.length > 0 ? found.images[0] : '/uploads/00bff452-677b-45ee-9673-1077bb3a7fe8.jpg';
-        return {
+        mergedItems.push({
           id: String(found.id),
           name: found.name,
           Discounter_price: Number(found.Discounter_price) || 299,
@@ -63,9 +65,45 @@ export default function CartClient() {
           subtitle: 'Authentic Heritage Item',
           quantity: cItem.quantity,
           image,
-        };
-      })
-      .filter(Boolean);
+        });
+      } else {
+        missingIds.push(String(cItem.id));
+      }
+    });
+
+    // 2. If any items are from the Directus backend, fetch them
+    if (missingIds.length > 0) {
+      try {
+        const fetchUrl = `${DIRECTUS_URL}/items/Products?fields=*,images.*&filter[id][_in]=${missingIds.join(',')}`;
+        const res = await fetch(fetchUrl);
+        const json = await res.json();
+        if (Array.isArray(json?.data)) {
+          json.data.forEach((p: any) => {
+            const cItem = rawCart.find((c) => String(c.id) === String(p.id));
+            const qty = cItem ? cItem.quantity : 1;
+            const catArray = Array.isArray(p.category) ? p.category : [p.category || 'Gifting'];
+            let image = '/uploads/00bff452-677b-45ee-9673-1077bb3a7fe8.jpg';
+            if (p.images && p.images.length > 0) {
+              const firstImg = p.images[0];
+              const fileId = typeof firstImg === 'object' && firstImg?.directus_files_id ? firstImg.directus_files_id : firstImg;
+              image = getAssetUrl(fileId);
+            }
+            mergedItems.push({
+              id: String(p.id),
+              name: p.name,
+              Discounter_price: Number(p.Discounter_price) || 299,
+              original_price: Number(p.original_price) || Number(p.Discounter_price || 299) * 1.15,
+              category: catArray[0] || 'Gifting',
+              subtitle: 'Authentic Heritage Item',
+              quantity: qty,
+              image,
+            });
+          });
+        }
+      } catch (e) {
+        console.error('Error fetching backend cart items:', e);
+      }
+    }
 
     setCartItems(mergedItems);
     setLoading(false);
@@ -73,6 +111,15 @@ export default function CartClient() {
 
   useEffect(() => {
     loadCart();
+    const handleCartUpdated = () => {
+      loadCart();
+    };
+    window.addEventListener('cart-updated', handleCartUpdated);
+    window.addEventListener('storage', handleCartUpdated);
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdated);
+      window.removeEventListener('storage', handleCartUpdated);
+    };
   }, [loadCart]);
 
   // Storage & Event helper

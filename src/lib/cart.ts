@@ -8,6 +8,7 @@ export function addToCart(productId: string, quantity: number = 1) {
   } else {
     cart.push({ id: String(productId), quantity });
   }
-  localStorage.setItem('cart', JSON.stringify(cart));
-  window.dispatchEvent(new Event('cart-updated'));
+  setTimeout(() => {
+    window.dispatchEvent(new Event('cart-updated'));
+  }, 0);
 } 

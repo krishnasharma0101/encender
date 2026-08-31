@@ -75,6 +75,16 @@ export default function CartClient() {
     loadCart();
   }, [loadCart]);
 
+  // Storage & Event helper
+  const syncCartToStorage = (updated: any[]) => {
+    if (typeof window === 'undefined') return;
+    const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
+    localStorage.setItem('cart', JSON.stringify(stored));
+    setTimeout(() => {
+      window.dispatchEvent(new Event('cart-updated'));
+    }, 0);
+  };
+
   // Quantity Handlers
   const updateQuantity = (id: string, delta: number) => {
     setCartItems((prev) => {
@@ -89,12 +99,7 @@ export default function CartClient() {
         })
         .filter((item): item is NonNullable<typeof item> => item !== null);
 
-      // Persist to localStorage
-      if (typeof window !== 'undefined') {
-        const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
-        localStorage.setItem('cart', JSON.stringify(stored));
-        window.dispatchEvent(new Event('cart-updated'));
-      }
+      syncCartToStorage(updated);
       return updated;
     });
   };
@@ -102,11 +107,7 @@ export default function CartClient() {
   const removeItem = (id: string) => {
     setCartItems((prev) => {
       const updated = prev.filter((item) => String(item.id) !== String(id));
-      if (typeof window !== 'undefined') {
-        const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
-        localStorage.setItem('cart', JSON.stringify(stored));
-        window.dispatchEvent(new Event('cart-updated'));
-      }
+      syncCartToStorage(updated);
       return updated;
     });
   };
@@ -137,11 +138,7 @@ export default function CartClient() {
           },
         ];
       }
-      if (typeof window !== 'undefined') {
-        const stored = updated.map((i) => ({ id: i.id, quantity: i.quantity }));
-        localStorage.setItem('cart', JSON.stringify(stored));
-        window.dispatchEvent(new Event('cart-updated'));
-      }
+      syncCartToStorage(updated);
       return updated;
     });
   };

@@ -3,6 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import {
+  ArrowLeft,
+  HelpCircle,
+  Lock,
+  ShieldCheck,
+  Headphones,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 interface AuthScreenProps {
   initialMode?: 'signin' | 'signup';
@@ -37,7 +46,6 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
       return;
     }
 
-    // Since NextAuth is configured with Google OAuth, encourage Google 1-click or save demo profile
     if (typeof window !== 'undefined') {
       const demoProfile = {
         name: fullName || 'Encender Member',
@@ -45,7 +53,7 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
         phone: phone ? `+91 ${phone}` : '+91 90285 02581',
       };
       localStorage.setItem('encender_user_profile', JSON.stringify(demoProfile));
-      setMessage('Account updated! Redirecting...');
+      setMessage('Account registered! Redirecting...');
       setTimeout(() => {
         window.location.href = '/account';
       }, 1000);
@@ -66,7 +74,7 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
               href="/products"
               className="text-[#574142] hover:text-[#80182a] transition-colors duration-200 flex items-center gap-1.5 text-sm font-medium"
             >
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              <ArrowLeft className="w-4 h-4" />
               Back to Shop
             </Link>
             <a
@@ -76,7 +84,7 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
               className="text-[#574142] hover:text-[#80182a] transition-colors duration-200"
               title="Need Help?"
             >
-              <span className="material-symbols-outlined text-[20px]">help_outline</span>
+              <HelpCircle className="w-5 h-5" />
             </a>
           </nav>
         </div>
@@ -220,11 +228,13 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7172] hover:text-[#80182a] transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7172] hover:text-[#80182a] transition-colors p-1"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {showPassword ? 'visibility' : 'visibility_off'}
-                      </span>
+                      {showPassword ? (
+                        <Eye className="w-4 h-4" />
+                      ) : (
+                        <EyeOff className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -246,11 +256,13 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7172] hover:text-[#80182a] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7172] hover:text-[#80182a] transition-colors p-1"
                       >
-                        <span className="material-symbols-outlined text-[18px]">
-                          {showConfirmPassword ? 'visibility' : 'visibility_off'}
-                        </span>
+                        {showConfirmPassword ? (
+                          <Eye className="w-4 h-4" />
+                        ) : (
+                          <EyeOff className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -308,25 +320,25 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
                   rel="noreferrer"
                   className="w-full bg-[#fbf9f6] border border-[#e4e2df] text-[#1b1c1a] font-semibold text-sm py-2.5 px-4 rounded-lg hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 transition-colors flex justify-center items-center gap-3 cursor-pointer shadow-xs"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-emerald-600">
-                    chat
-                  </span>
+                  <svg className="w-4 h-4 text-emerald-600 shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.073-2.027-.478-1.614-.668-2.651-2.316-2.731-2.424-.08-.108-.65-8.66-.65-1.654 0-.787.41-1.177.556-1.336.145-.16.318-.199.424-.199.106 0 .212.001.305.006.098.005.23-.037.36.275.133.318.455 1.111.494 1.192.039.08.066.175.013.281-.053.106-.08.172-.16.265-.08.093-.168.207-.24.278-.08.079-.163.165-.07.324.093.16.413.681.885 1.102.608.542 1.121.71 1.28.79.16.079.252.066.345-.04.093-.106.398-.464.504-.623.106-.16.212-.133.358-.079.146.053.928.437 1.087.516.16.08.265.12.305.186.04.066.04.385-.104.79z"/>
+                  </svg>
                   Continue with WhatsApp
                 </a>
               </div>
 
               {/* Trust Badges */}
               <div className="mt-8 flex justify-between items-center px-2 pt-4 border-t border-[#e4e2df] opacity-80">
-                <div className="flex items-center gap-1 text-[#574142]">
-                  <span className="material-symbols-outlined text-[15px] text-[#80182a]">lock</span>
+                <div className="flex items-center gap-1.5 text-[#574142]">
+                  <Lock className="w-3.5 h-3.5 text-[#80182a]" />
                   <span className="text-[11px] font-medium">Secure</span>
                 </div>
-                <div className="flex items-center gap-1 text-[#574142]">
-                  <span className="material-symbols-outlined text-[15px] text-[#80182a]">verified</span>
+                <div className="flex items-center gap-1.5 text-[#574142]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#80182a]" />
                   <span className="text-[11px] font-medium">Verified</span>
                 </div>
-                <div className="flex items-center gap-1 text-[#574142]">
-                  <span className="material-symbols-outlined text-[15px] text-[#80182a]">support_agent</span>
+                <div className="flex items-center gap-1.5 text-[#574142]">
+                  <Headphones className="w-3.5 h-3.5 text-[#80182a]" />
                   <span className="text-[11px] font-medium">Support</span>
                 </div>
               </div>

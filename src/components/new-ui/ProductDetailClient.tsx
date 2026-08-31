@@ -12,7 +12,7 @@ interface ProductDetailClientProps {
   productId?: string;
 }
 
-const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
+const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '') : '';
 
 export default function ProductDetailClient({ productId }: ProductDetailClientProps) {
   // Find real product synchronously for zero-latency SSR & CSR matching exact productId
@@ -105,7 +105,7 @@ export default function ProductDetailClient({ productId }: ProductDetailClientPr
     }
 
     // 2. Background try Directus API if configured
-    if (DIRECTUS_URL && productId && !productId.startsWith('sample')) {
+    if (productId && !productId.startsWith('sample')) {
       try {
         const { data, error } = await fetchDirectusData<any>(
           `${DIRECTUS_URL}/items/Products/${productId}?fields=*,images.*`

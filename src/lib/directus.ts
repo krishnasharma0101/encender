@@ -38,7 +38,7 @@ export const DIRECTUS_PUBLIC_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || '';
 export function getAssetUrl(fileId: string): string {
   if (!fileId) return '';
   if (fileId.startsWith('/') || fileId.startsWith('http')) return fileId;
-  const base = DIRECTUS_PUBLIC_URL || 'http://localhost:8055';
+  const base = DIRECTUS_PUBLIC_URL ? DIRECTUS_PUBLIC_URL.replace(/\/$/, '') : '';
   return `${base}/assets/${fileId}`;
 }
 

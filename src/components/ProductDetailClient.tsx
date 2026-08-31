@@ -56,7 +56,7 @@ export default function ProductDetailClient({ product, params = { category: '' }
       setFetchedRelated(relatedProducts);
       return;
     }
-    const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
+    const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '') : '';
     fetch(`${directusUrl}/items/Products?limit=4&filter[id][_neq]=${product.id}&fields=id,name,Discounter_price,images.*,category`)
       .then(res => res.json())
       .then(data => {

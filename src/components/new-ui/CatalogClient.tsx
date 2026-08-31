@@ -8,7 +8,7 @@ import { getAssetUrl, getCategorySlug } from '@/lib/directus';
 
 import { REAL_PRODUCTS } from '@/data/realProducts';
 
-const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
+const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '') : '';
 
 interface CatalogClientProps {
   initialCategory?: string;

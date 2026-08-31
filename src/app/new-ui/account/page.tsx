@@ -290,7 +290,7 @@ export default function NewUIAccountPage() {
     setEditSaving(false);
 
     // Optional background sync with Directus if API is active
-    if (DIRECTUS_URL && profile?.id && !String(profile.id).startsWith('guest')) {
+    if (profile?.id && !String(profile.id).startsWith('guest')) {
       try {
         await fetch(`${DIRECTUS_URL}/items/user/${profile.id}`, {
           method: 'PATCH',
@@ -334,7 +334,7 @@ export default function NewUIAccountPage() {
     setAddressSaving(false);
 
     // Optional background sync with Directus if API is active
-    if (DIRECTUS_URL && profile?.id && !String(profile.id).startsWith('guest')) {
+    if (profile?.id && !String(profile.id).startsWith('guest')) {
       try {
         await fetch(`${DIRECTUS_URL}/items/addresses`, {
           method: 'POST',

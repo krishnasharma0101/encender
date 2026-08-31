@@ -231,23 +231,26 @@ export default function NewUIPage() {
           {/* Cards Carousel */}
           <div
             ref={scrollRef}
-            className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-5 hide-scrollbar pb-3 cursor-grab select-none"
+            className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-5 md:gap-6 hide-scrollbar pb-3 cursor-grab select-none"
           >
             {collections.map((item, idx) => (
               <Link
                 key={idx}
                 href={item.link}
-                className="group relative aspect-[4/3.2] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 min-w-[190px] md:min-w-[230px] flex-shrink-0 snap-start bg-gray-100"
+                className="group relative w-[210px] sm:w-[240px] md:w-[260px] aspect-[4/5] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 flex-shrink-0 snap-start bg-gray-100 border border-gray-200/60 block"
               >
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   draggable={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 w-full p-3.5">
-                  <h3 className="font-sans-body text-sm md:text-base text-white font-bold tracking-wide">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 w-full p-4 sm:p-5 flex flex-col justify-end">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#ffddb8] mb-1 opacity-90">
+                    Collection
+                  </span>
+                  <h3 className="font-serif-heading text-base sm:text-lg text-white font-bold tracking-wide leading-snug group-hover:text-[#ffddb8] transition-colors">
                     {item.name}
                   </h3>
                 </div>

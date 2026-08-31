@@ -229,8 +229,7 @@ export default function WishlistClient() {
             </Link>
           </div>
         ) : (
-          /* Wishlist Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <div className="flex flex-col gap-4 md:gap-5 max-w-4xl">
             {items.map((item) => {
               const discountPercent =
                 item.original_price > item.Discounter_price
@@ -242,61 +241,60 @@ export default function WishlistClient() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl shadow-xs border border-gray-200/70 p-3 sm:p-0 sm:overflow-hidden relative flex flex-row sm:flex-col gap-3 sm:gap-0 group hover:shadow-md transition-all duration-300"
+                  className="bg-white rounded-2xl shadow-xs border border-gray-200/80 p-3 sm:p-5 relative flex flex-row gap-4 sm:gap-6 group hover:shadow-md transition-all duration-300 items-center"
                 >
-                  {/* Thumbnail Image Container */}
+                  {/* Thumbnail Image Container - Full image visible with object-contain */}
                   <Link
                     href={`/new-ui/product/${item.id}`}
-                    className="w-24 h-24 sm:w-full sm:aspect-[4/5] flex-shrink-0 rounded-xl sm:rounded-none overflow-hidden bg-gray-50 relative block border border-gray-100 sm:border-0"
+                    className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50/90 border border-gray-100 relative p-2 flex items-center justify-center group-hover:border-amber-200 transition-colors block"
                   >
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
-                    {/* Desktop Category Badges */}
-                    <div className="hidden sm:flex absolute top-3 left-3 z-10 flex-col gap-1.5 pointer-events-none">
-                      <span className="bg-white/90 backdrop-blur-sm text-gray-900 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase shadow-xs">
-                        {item.category}
-                      </span>
-                      <span className="bg-[#80182a]/90 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-medium shadow-xs">
-                        Personalizable
-                      </span>
-                    </div>
                   </Link>
 
-                  {/* Delete Button */}
+                  {/* Delete Button (Top Right) */}
                   <button
                     onClick={() => handleRemove(item.id)}
                     aria-label="Remove from wishlist"
-                    className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 bg-gray-100/90 sm:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer shadow-xs"
+                    className="absolute top-3 right-3 z-10 w-8 h-8 bg-gray-100/90 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-xs"
                   >
-                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
 
                   {/* Content Area */}
-                  <div className="flex-grow flex flex-col justify-between pr-7 sm:pr-0 sm:p-4">
+                  <div className="flex-grow flex flex-col justify-between self-stretch pr-8 sm:pr-10 py-0.5">
                     <div>
-                      <span className="sm:hidden text-[10px] font-bold uppercase tracking-wider text-[#80182a]">
-                        {item.category}
-                      </span>
+                      {/* Badges */}
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className="bg-[#855300]/10 text-[#855300] px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                          {item.category}
+                        </span>
+                        <span className="bg-[#80182a]/10 text-[#80182a] px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold">
+                          Personalizable
+                        </span>
+                      </div>
+
+                      {/* Product Name */}
                       <Link href={`/new-ui/product/${item.id}`}>
-                        <h3 className="font-serif text-sm sm:text-base font-bold text-gray-900 line-clamp-1 sm:line-clamp-2 leading-snug hover:text-[#80182a] transition-colors">
+                        <h3 className="font-serif text-base sm:text-xl font-bold text-gray-900 line-clamp-2 leading-snug hover:text-[#80182a] transition-colors">
                           {item.name}
                         </h3>
                       </Link>
 
                       {/* Pricing */}
-                      <div className="flex items-baseline gap-2 mt-1 sm:mt-2 sm:mb-4">
-                        <span className="text-base sm:text-lg font-bold text-gray-900 font-serif">
+                      <div className="flex items-baseline gap-2 mt-1.5 sm:mt-2">
+                        <span className="text-base sm:text-xl font-bold text-gray-900 font-serif">
                           ₹{Number(item.Discounter_price).toLocaleString('en-IN')}
                         </span>
                         {item.original_price > item.Discounter_price && (
                           <>
-                            <span className="text-xs text-gray-400 line-through">
+                            <span className="text-xs sm:text-sm text-gray-400 line-through">
                               ₹{Number(item.original_price).toLocaleString('en-IN')}
                             </span>
-                            <span className="text-[11px] sm:text-xs font-bold text-emerald-600">
+                            <span className="text-xs sm:text-sm font-bold text-emerald-600">
                               {discountPercent}% OFF
                             </span>
                           </>
@@ -305,16 +303,16 @@ export default function WishlistClient() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-row sm:flex-col gap-2 mt-2 sm:mt-auto">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 mt-3 pt-2 sm:pt-0">
                       <button
                         onClick={(e) => handleAddToCart(e, item)}
-                        className={`flex-1 sm:w-full py-1.5 sm:py-2.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all duration-300 cursor-pointer ${
+                        className={`py-2 sm:py-2.5 px-4 sm:px-6 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition-all duration-300 cursor-pointer ${
                           addedId === String(item.id)
                             ? 'bg-emerald-600 text-white scale-[1.02]'
-                            : 'bg-[#f59e0b] text-white hover:bg-[#d97706]'
+                            : 'bg-[#f59e0b] text-white hover:bg-[#d97706] active:scale-95'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-[15px]">
+                        <span className="material-symbols-outlined text-base">
                           {addedId === String(item.id) ? 'check_circle' : 'shopping_bag'}
                         </span>
                         <span>{addedId === String(item.id) ? 'Added to Bag!' : 'Add to Bag'}</span>
@@ -326,29 +324,15 @@ export default function WishlistClient() {
                         )}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="hidden sm:flex w-full items-center justify-center gap-2 text-gray-700 py-2 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors text-xs font-semibold"
+                        className="flex items-center justify-center gap-2 text-gray-700 py-2 sm:py-2.5 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors text-xs sm:text-sm font-semibold"
                       >
                         <svg
-                          className="w-3.5 h-3.5 text-emerald-600 fill-current"
+                          className="w-4 h-4 text-emerald-600 fill-current flex-shrink-0"
                           viewBox="0 0 24 24"
                         >
                           <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.073-2.027-.478-1.614-.668-2.651-2.316-2.731-2.424-.08-.108-.65-8.66-.65-1.654 0-.787.41-1.177.556-1.336.145-.16.318-.199.424-.199.106 0 .212.001.305.006.098.005.23-.037.36.275.133.318.455 1.111.494 1.192.039.08.066.175.013.281-.053.106-.08.172-.16.265-.08.093-.168.207-.24.278-.08.079-.163.165-.07.324.093.16.413.681.885 1.102.608.542 1.121.71 1.28.79.16.079.252.066.345-.04.093-.106.398-.464.504-.623.106-.16.212-.133.358-.079.146.053.928.437 1.087.516.16.08.265.12.305.186.04.066.04.385-.104.79z" />
                         </svg>
-                        Buy via WhatsApp
-                      </a>
-
-                      <a
-                        href={`https://wa.me/919028502581?text=${encodeURIComponent(
-                          `Hi Encender! I want to inquire/buy: ${item.name} (Price: ₹${item.Discounter_price})`
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="sm:hidden p-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg flex items-center justify-center"
-                        aria-label="WhatsApp Inquiry"
-                      >
-                        <svg className="w-4 h-4 text-emerald-600 fill-current" viewBox="0 0 24 24">
-                          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.073-2.027-.478-1.614-.668-2.651-2.316-2.731-2.424-.08-.108-.65-8.66-.65-1.654 0-.787.41-1.177.556-1.336.145-.16.318-.199.424-.199.106 0 .212.001.305.006.098.005.23-.037.36.275.133.318.455 1.111.494 1.192.039.08.066.175.013.281-.053.106-.08.172-.16.265-.08.093-.168.207-.24.278-.08.079-.163.165-.07.324.093.16.413.681.885 1.102.608.542 1.121.71 1.28.79.16.079.252.066.345-.04.093-.106.398-.464.504-.623.106-.16.212-.133.358-.079.146.053.928.437 1.087.516.16.08.265.12.305.186.04.066.04.385-.104.79z" />
-                        </svg>
+                        <span>Buy via WhatsApp</span>
                       </a>
                     </div>
                   </div>

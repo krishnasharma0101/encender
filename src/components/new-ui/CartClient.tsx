@@ -254,71 +254,71 @@ export default function CartClient() {
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex flex-col sm:flex-row gap-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 transition-transform hover:-translate-y-0.5 duration-300"
+                  className="flex flex-row gap-3.5 sm:gap-6 bg-white p-3.5 sm:p-6 rounded-2xl shadow-sm border border-gray-200/70 transition-transform hover:-translate-y-0.5 duration-300 items-center"
                 >
-                  {/* Thumbnail Image */}
+                  {/* Thumbnail Image - Full image visible with object-contain */}
                   <Link
                     href={`/new-ui/product/${item.id}`}
-                    className="w-full sm:w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 block"
+                    className="w-24 h-24 sm:w-36 sm:h-36 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50/90 border border-gray-100 block p-1.5 sm:p-2 flex items-center justify-center"
                   >
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                     />
                   </Link>
 
                   {/* Item Specs & Price */}
-                  <div className="flex-grow flex flex-col justify-between">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
+                  <div className="flex-grow flex flex-col justify-between self-stretch min-w-0 py-0.5">
+                    <div>
+                      <div className="flex justify-between items-start gap-2">
                         <Link
                           href={`/new-ui/product/${item.id}`}
-                          className="hover:text-[#855300] transition-colors"
+                          className="hover:text-[#855300] transition-colors min-w-0"
                         >
-                          <h3 className="font-sans-body font-bold text-lg text-gray-900 mb-1">
+                          <h3 className="font-sans-body font-bold text-sm sm:text-lg text-gray-900 mb-0.5 sm:mb-1 line-clamp-2 leading-snug">
                             {item.name}
                           </h3>
                         </Link>
-                        <p className="text-xs text-gray-500">{item.subtitle}</p>
-                        {item.personalized && (
-                          <p className="text-xs text-[#855300] mt-1.5 font-medium">
-                            Personalized: <span className="italic font-semibold">{item.personalized}</span>
-                          </p>
-                        )}
+                        <div className="text-right flex-shrink-0">
+                          <span className="font-serif-heading text-base sm:text-xl font-bold text-gray-900">
+                            ₹{(item.Discounter_price * item.quantity).toLocaleString('en-IN')}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="font-serif-heading text-xl font-bold text-gray-900">
-                          ₹{(item.Discounter_price * item.quantity).toLocaleString('en-IN')}
-                        </span>
-                      </div>
+                      <p className="text-[11px] sm:text-xs text-gray-500 line-clamp-1">{item.subtitle}</p>
+                      {item.personalized && (
+                        <p className="text-[11px] sm:text-xs text-[#855300] mt-0.5 sm:mt-1 font-medium line-clamp-1">
+                          Personalized: <span className="italic font-semibold">{item.personalized}</span>
+                        </p>
+                      )}
                     </div>
 
                     {/* Quantity Controls & Remove Action */}
-                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+                    <div className="flex justify-between items-center mt-2.5 sm:mt-6 pt-2.5 sm:pt-4 border-t border-gray-100">
                       <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
                         <button
                           onClick={() => updateQuantity(item.id, -1)}
                           aria-label="Decrease quantity"
-                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors font-bold"
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors font-bold cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-sm">remove</span>
+                          <span className="material-symbols-outlined text-xs sm:text-sm">remove</span>
                         </button>
-                        <span className="w-10 text-center text-xs font-bold text-gray-900">
+                        <span className="w-8 sm:w-10 text-center text-xs font-bold text-gray-900">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, 1)}
                           aria-label="Increase quantity"
-                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors font-bold"
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors font-bold cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-sm">add</span>
+                          <span className="material-symbols-outlined text-xs sm:text-sm">add</span>
                         </button>
                       </div>
 
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="text-xs text-red-600 hover:text-red-700 font-semibold underline flex items-center gap-1 transition-colors"
+                        className="text-xs text-red-600 hover:text-red-700 font-semibold underline flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-sm">delete</span> Remove
                       </button>

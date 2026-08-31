@@ -24,6 +24,8 @@ import {
   Eye,
   Home,
   Sparkles,
+  Check,
+  Trash2,
 } from 'lucide-react';
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || '';
@@ -64,7 +66,15 @@ export default function NewUIAccountPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editProfile, setEditProfile] = useState<Record<string, string>>({});
   const [editSaving, setEditSaving] = useState(false);
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('encender_user_addresses');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return [];
+  });
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addressForm, setAddressForm] = useState<Partial<Address>>({});
   const [addressSaving, setAddressSaving] = useState(false);
@@ -98,8 +108,39 @@ export default function NewUIAccountPage() {
               .catch(() => setOrders([]));
             fetch(`${DIRECTUS_URL}/items/addresses?filter[user][_eq]=${parsed.id}`)
               .then((r) => r.json())
-              .then((j) => setAddresses(j.data || []))
-              .catch(() => setAddresses([]));
+              .then((j) => {
+                if (Array.isArray(j.data) && j.data.length > 0) {
+                  let fetchedAddrs: Address[] = j.data;
+                  const hasDefault = fetchedAddrs.some((a) => a.is_default === true);
+                  if (!hasDefault) {
+                    const savedStr = typeof window !== 'undefined' ? localStorage.getItem('encender_user_addresses') : null;
+                    const savedAddrs: Address[] = savedStr ? JSON.parse(savedStr) : [];
+                    const savedDef = savedAddrs.find((a) => a.is_default);
+                    const matchId = savedDef ? String(savedDef.id) : null;
+                    fetchedAddrs = fetchedAddrs.map((a, idx) => ({
+                      ...a,
+                      is_default: matchId ? String(a.id) === matchId : idx === 0,
+                    }));
+                  }
+                  setAddresses(fetchedAddrs);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('encender_user_addresses', JSON.stringify(fetchedAddrs));
+                  }
+                  const def = fetchedAddrs.find((a) => a.is_default) || fetchedAddrs[0];
+                  if (def) {
+                    const fullAddr = [def.address_line1, def.address_line2].filter(Boolean).join(', ');
+                    setProfile((prev) => prev ? {
+                      ...prev,
+                      address: fullAddr,
+                      city: def.city,
+                      state: def.state,
+                      zip: def.pincode,
+                      phone: def.phone || (prev.phone as string) || '',
+                    } : prev);
+                  }
+                }
+              })
+              .catch(() => {});
             setLoading(false);
             return;
           }
@@ -183,7 +224,39 @@ export default function NewUIAccountPage() {
             setOrders(ordersJson.data || []);
             const addrRes = await fetch(`${DIRECTUS_URL}/items/addresses?filter[user][_eq]=${finalUser.id}`);
             const addrJson = await addrRes.json();
-            setAddresses(addrJson.data || []);
+            if (Array.isArray(addrJson.data) && addrJson.data.length > 0) {
+              let fetchedAddrs: Address[] = addrJson.data;
+              const hasDefault = fetchedAddrs.some((a) => a.is_default === true);
+              if (!hasDefault) {
+                const savedStr = typeof window !== 'undefined' ? localStorage.getItem('encender_user_addresses') : null;
+                const savedAddrs: Address[] = savedStr ? JSON.parse(savedStr) : [];
+                const savedDef = savedAddrs.find((a) => a.is_default);
+                const matchId = savedDef ? String(savedDef.id) : null;
+                fetchedAddrs = fetchedAddrs.map((a, idx) => ({
+                  ...a,
+                  is_default: matchId ? String(a.id) === matchId : idx === 0,
+                }));
+              }
+              setAddresses(fetchedAddrs);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('encender_user_addresses', JSON.stringify(fetchedAddrs));
+              }
+              const def = fetchedAddrs.find((a) => a.is_default) || fetchedAddrs[0];
+              if (def) {
+                const fullAddr = [def.address_line1, def.address_line2].filter(Boolean).join(', ');
+                finalUser.address = fullAddr;
+                finalUser.city = def.city;
+                finalUser.state = def.state;
+                finalUser.zip = def.pincode;
+                finalUser.phone = def.phone || finalUser.phone;
+                setProfile({ ...finalUser });
+              }
+            } else {
+              const savedStr = typeof window !== 'undefined' ? localStorage.getItem('encender_user_addresses') : null;
+              if (savedStr) {
+                setAddresses(JSON.parse(savedStr));
+              }
+            }
           } catch (e) {}
         }
       } catch {
@@ -258,33 +331,144 @@ export default function NewUIAccountPage() {
   }
 
   // Edit profile handlers
+  const handleOpenEditModal = () => {
+    const def = addresses.find((a) => a.is_default) || (addresses.length > 0 ? addresses[0] : null);
+    setEditProfile({
+      name: (profile?.name as string) || '',
+      phone: (profile?.phone as string) || def?.phone || '',
+      address: def?.address_line1 || (profile?.address as string) || '',
+      city: def?.city || (profile?.city as string) || '',
+      state: def?.state || (profile?.state as string) || '',
+      zip: def?.pincode || (profile?.zip as string) || '',
+      country: (profile?.country as string) || 'India',
+    });
+    setEditModalOpen(true);
+  };
+
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditProfile({ ...editProfile, [e.target.name]: e.target.value });
   };
+
   const handleEditSave = async () => {
     setEditSaving(true);
 
-    const updatedProfile = { ...(profile || {}), ...editProfile };
+    const updatedProfile = {
+      ...(profile || {}),
+      name: editProfile.name,
+      phone: editProfile.phone,
+      address: editProfile.address,
+      city: editProfile.city,
+      state: editProfile.state,
+      zip: editProfile.zip,
+      country: editProfile.country,
+    };
     setProfile(updatedProfile);
     if (typeof window !== 'undefined') {
       localStorage.setItem('encender_user_profile', JSON.stringify(updatedProfile));
     }
 
-    setEditModalOpen(false);
-    setEditSaving(false);
+    // Synchronize active default address with the updated info
+    const targetDef = addresses.find((a) => a.is_default) || (addresses.length > 0 ? addresses[0] : null);
+    if (targetDef) {
+      const updatedAddresses = addresses.map((a) => {
+        if (String(a.id) === String(targetDef.id)) {
+          return {
+            ...a,
+            address_line1: editProfile.address || a.address_line1,
+            city: editProfile.city || a.city,
+            state: editProfile.state || a.state,
+            pincode: editProfile.zip || a.pincode,
+            phone: editProfile.phone || a.phone,
+            is_default: true,
+          };
+        }
+        return a;
+      });
+      setAddresses(updatedAddresses);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('encender_user_addresses', JSON.stringify(updatedAddresses));
+      }
 
-    // Optional background sync with Directus if API is active
+      // Persist address changes to Directus
+      if (!String(targetDef.id).startsWith('addr-')) {
+        try {
+          await fetch(`${DIRECTUS_URL}/items/addresses/${targetDef.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              address_line1: editProfile.address,
+              city: editProfile.city,
+              state: editProfile.state,
+              pincode: editProfile.zip,
+              phone: editProfile.phone,
+            }),
+          });
+        } catch (e) {
+          console.log('Directus address update error:', e);
+        }
+      }
+    } else if (editProfile.address) {
+      // If no address exists yet, create one
+      const newAddr: Address = {
+        id: 'addr-' + Date.now(),
+        address_line1: editProfile.address,
+        address_line2: '',
+        city: editProfile.city || '',
+        state: editProfile.state || '',
+        pincode: editProfile.zip || '',
+        phone: editProfile.phone || '',
+        is_default: true,
+      };
+      if (profile?.id && !String(profile.id).startsWith('guest')) {
+        try {
+          const res = await fetch(`${DIRECTUS_URL}/items/addresses`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              address_line1: editProfile.address,
+              address_line2: '',
+              city: editProfile.city || '',
+              state: editProfile.state || '',
+              pincode: editProfile.zip || '',
+              phone: editProfile.phone || '',
+              is_default: true,
+              user: profile.id,
+            }),
+          });
+          const json = await res.json();
+          if (json?.data?.id) newAddr.id = json.data.id;
+        } catch (e) {}
+      }
+      const updated = [newAddr];
+      setAddresses(updated);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('encender_user_addresses', JSON.stringify(updated));
+      }
+    }
+
+    // Sync profile to Directus
     if (profile?.id && !String(profile.id).startsWith('guest')) {
       try {
         await fetch(`${DIRECTUS_URL}/items/user/${profile.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editProfile),
+          body: JSON.stringify({
+            name: editProfile.name,
+            phone: editProfile.phone,
+            address: editProfile.address,
+            city: editProfile.city,
+            state: editProfile.state,
+            zip: editProfile.zip,
+            country: editProfile.country,
+          }),
         });
       } catch (e) {
         console.log('Directus profile sync skipped:', e);
       }
     }
+
+    setEditModalOpen(false);
+    setEditSaving(false);
   };
 
   // Address book handlers
@@ -296,16 +480,38 @@ export default function NewUIAccountPage() {
     e.preventDefault();
     setAddressSaving(true);
 
-    const newAddress: Address = {
-      id: 'addr-' + Date.now(),
+    const isFirst = addresses.length === 0;
+    const addressData = {
       address_line1: addressForm.address_line1 || '',
       address_line2: addressForm.address_line2 || '',
       city: addressForm.city || '',
       state: addressForm.state || '',
       pincode: addressForm.pincode || '',
       phone: addressForm.phone || (profile?.phone as string) || '+91 90285 02581',
-      is_default: addresses.length === 0,
+      is_default: isFirst,
     };
+
+    let newAddress: Address = {
+      id: 'addr-' + Date.now(),
+      ...addressData,
+    };
+
+    // Persist to Directus API and capture real ID
+    if (profile?.id && !String(profile.id).startsWith('guest')) {
+      try {
+        const res = await fetch(`${DIRECTUS_URL}/items/addresses`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...addressData, user: profile.id }),
+        });
+        const resJson = await res.json();
+        if (resJson?.data?.id) {
+          newAddress.id = resJson.data.id;
+        }
+      } catch (e) {
+        console.log('Directus address save error:', e);
+      }
+    }
 
     const updated = [...addresses, newAddress];
     setAddresses(updated);
@@ -313,40 +519,223 @@ export default function NewUIAccountPage() {
       localStorage.setItem('encender_user_addresses', JSON.stringify(updated));
     }
 
+    // If it's the first address, immediately set as billing address
+    if (isFirst) {
+      const fullAddress = [newAddress.address_line1, newAddress.address_line2].filter(Boolean).join(', ');
+      const updatedProfile = {
+        ...(profile || {}),
+        address: fullAddress,
+        city: newAddress.city,
+        state: newAddress.state,
+        zip: newAddress.pincode,
+        phone: newAddress.phone,
+      };
+      setProfile(updatedProfile);
+      setEditProfile((prev) => ({
+        ...prev,
+        address: fullAddress,
+        city: newAddress.city,
+        state: newAddress.state,
+        zip: newAddress.pincode,
+        phone: newAddress.phone,
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('encender_user_profile', JSON.stringify(updatedProfile));
+      }
+      if (profile?.id && !String(profile.id).startsWith('guest')) {
+        try {
+          await fetch(`${DIRECTUS_URL}/items/user/${profile.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              address: fullAddress,
+              city: newAddress.city,
+              state: newAddress.state,
+              zip: newAddress.pincode,
+              phone: newAddress.phone,
+            }),
+          });
+        } catch {}
+      }
+    }
+
     setAddressModalOpen(false);
     setAddressForm({});
     setAddressSaving(false);
-
-    // Optional background sync with Directus if API is active
-    if (profile?.id && !String(profile.id).startsWith('guest')) {
-      try {
-        await fetch(`${DIRECTUS_URL}/items/addresses`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...addressForm, user: profile.id }),
-        });
-      } catch (e) {
-        console.log('Directus address sync skipped:', e);
-      }
-    }
   };
 
-  const handleDeleteAddress = (id: string | number) => {
-    const updated = addresses.filter((a) => String(a.id) !== String(id));
+  const handleDeleteAddress = async (id: string | number) => {
+    const deletedAddr = addresses.find((a) => String(a.id) === String(id));
+    let updated = addresses.filter((a) => String(a.id) !== String(id));
+
+    // Actually delete from Directus API
+    if (profile?.id && !String(profile.id).startsWith('guest') && !String(id).startsWith('addr-')) {
+      try {
+        await fetch(`${DIRECTUS_URL}/items/addresses/${id}`, {
+          method: 'DELETE',
+        });
+      } catch (e) {
+        console.log('Directus address delete error:', e);
+      }
+    }
+
+    // If the deleted address was default, promote the first remaining one to default
+    if (deletedAddr?.is_default && updated.length > 0) {
+      updated = updated.map((a, idx) => ({ ...a, is_default: idx === 0 }));
+      const newDef = updated[0];
+      const fullAddress = [newDef.address_line1, newDef.address_line2].filter(Boolean).join(', ');
+      const updatedProfile = {
+        ...(profile || {}),
+        address: fullAddress,
+        city: newDef.city,
+        state: newDef.state,
+        zip: newDef.pincode,
+        phone: newDef.phone || (profile?.phone as string) || '',
+      };
+      setProfile(updatedProfile);
+      setEditProfile((prev) => ({
+        ...prev,
+        address: fullAddress,
+        city: newDef.city,
+        state: newDef.state,
+        zip: newDef.pincode,
+        phone: newDef.phone || prev.phone || '',
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('encender_user_profile', JSON.stringify(updatedProfile));
+      }
+      if (profile?.id && !String(profile.id).startsWith('guest') && !String(newDef.id).startsWith('addr-')) {
+        try {
+          await fetch(`${DIRECTUS_URL}/items/addresses/${newDef.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_default: true }),
+          });
+          await fetch(`${DIRECTUS_URL}/items/user/${profile.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              address: fullAddress,
+              city: newDef.city,
+              state: newDef.state,
+              zip: newDef.pincode,
+              phone: newDef.phone,
+            }),
+          });
+        } catch {}
+      }
+    } else if (updated.length === 0) {
+      const updatedProfile = {
+        ...(profile || {}),
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+      };
+      setProfile(updatedProfile);
+      setEditProfile((prev) => ({
+        ...prev,
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+      }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('encender_user_profile', JSON.stringify(updatedProfile));
+      }
+      if (profile?.id && !String(profile.id).startsWith('guest')) {
+        try {
+          await fetch(`${DIRECTUS_URL}/items/user/${profile.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address: '', city: '', state: '', zip: '' }),
+          });
+        } catch {}
+      }
+    }
+
     setAddresses(updated);
     if (typeof window !== 'undefined') {
       localStorage.setItem('encender_user_addresses', JSON.stringify(updated));
     }
   };
 
-  const handleSetDefaultAddress = (id: string | number) => {
-    const updated = addresses.map((a) => ({
+  const handleSetDefaultAddress = async (id: string | number) => {
+    const targetAddr = addresses.find((a) => String(a.id) === String(id));
+    if (!targetAddr) return;
+
+    const updatedAddresses = addresses.map((a) => ({
       ...a,
       is_default: String(a.id) === String(id),
     }));
-    setAddresses(updated);
+    setAddresses(updatedAddresses);
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem('encender_user_addresses', JSON.stringify(updated));
+      localStorage.setItem('encender_user_addresses', JSON.stringify(updatedAddresses));
+    }
+
+    // Immediately reflect under Billing Address in the profile sidebar
+    const fullAddress = [targetAddr.address_line1, targetAddr.address_line2].filter(Boolean).join(', ');
+    const updatedProfile = {
+      ...(profile || {}),
+      address: fullAddress,
+      city: targetAddr.city,
+      state: targetAddr.state,
+      zip: targetAddr.pincode,
+      phone: targetAddr.phone || (profile?.phone as string) || '',
+    };
+    setProfile(updatedProfile);
+    setEditProfile((prev) => ({
+      ...prev,
+      address: fullAddress,
+      city: targetAddr.city,
+      state: targetAddr.state,
+      zip: targetAddr.pincode,
+      phone: targetAddr.phone || prev.phone || '',
+    }));
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('encender_user_profile', JSON.stringify(updatedProfile));
+    }
+
+    // Persist is_default to Directus for all addresses
+    if (profile?.id && !String(profile.id).startsWith('guest')) {
+      try {
+        // Set is_default: true on selected address
+        if (!String(id).startsWith('addr-')) {
+          await fetch(`${DIRECTUS_URL}/items/addresses/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_default: true }),
+          });
+        }
+
+        // Set is_default: false on all other addresses
+        for (const addr of addresses) {
+          if (String(addr.id) !== String(id) && !String(addr.id).startsWith('addr-')) {
+            await fetch(`${DIRECTUS_URL}/items/addresses/${addr.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ is_default: false }),
+            });
+          }
+        }
+
+        // Update user profile billing address in Directus
+        await fetch(`${DIRECTUS_URL}/items/user/${profile.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            address: fullAddress,
+            city: targetAddr.city,
+            state: targetAddr.state,
+            zip: targetAddr.pincode,
+            phone: targetAddr.phone,
+          }),
+        });
+      } catch (e) {
+        console.log('Directus address update error:', e);
+      }
     }
   };
 
@@ -362,6 +751,9 @@ export default function NewUIAccountPage() {
         month: 'short',
       })
     : 'N/A';
+
+  // Active default address derived directly from addresses state
+  const defaultAddress = addresses.find((a) => a.is_default) || (addresses.length > 0 ? addresses[0] : null);
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-[#fbf9f6] flex items-center justify-center p-12 font-serif">
@@ -486,26 +878,44 @@ export default function NewUIAccountPage() {
                       Phone Number
                     </span>
                     <span className="text-sm font-semibold text-gray-700">
-                      {(profile.phone as string) || 'Not set'}
+                      {(profile.phone as string) || defaultAddress?.phone || 'Not set'}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
-                      Billing Address
-                    </span>
-                    <span className="text-sm font-semibold text-gray-700 leading-relaxed block">
-                      {profile.address ? (
+                  <MapPin className="w-5 h-5 text-[#855300] mt-0.5 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
+                        Default Billing Address
+                      </span>
+                      {defaultAddress && (
+                        <span className="text-[9px] font-bold text-[#855300] bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm font-semibold text-gray-800 leading-relaxed mt-1">
+                      {defaultAddress ? (
+                        <>
+                          <div className="text-gray-900 font-bold">{defaultAddress.address_line1}</div>
+                          {defaultAddress.address_line2 && (
+                            <div className="text-xs text-gray-600 mt-0.5">{defaultAddress.address_line2}</div>
+                          )}
+                          <div className="text-xs text-gray-600 mt-0.5">
+                            {defaultAddress.city}, {defaultAddress.state} -{' '}
+                            <span className="font-semibold text-gray-900">{defaultAddress.pincode}</span>
+                          </div>
+                        </>
+                      ) : profile.address ? (
                         `${profile.address}, ${profile.city || ''}, ${profile.state || ''} ${
                           profile.zip || ''
                         }`
                       ) : (
-                        <span className="text-gray-400 italic font-normal">Not set</span>
+                        <span className="text-gray-400 italic font-normal">No default address set</span>
                       )}
-                    </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -513,8 +923,8 @@ export default function NewUIAccountPage() {
               {/* Edit / Sign Out CTA Buttons */}
               <div className="w-full grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-gray-100">
                 <button
-                  onClick={() => setEditModalOpen(true)}
-                  className="w-full bg-[#855300]/10 text-[#855300] hover:bg-[#855300] hover:text-white py-2.5 px-4 rounded-xl font-bold text-xs transition duration-200 flex items-center justify-center gap-1.5"
+                  onClick={handleOpenEditModal}
+                  className="w-full bg-[#855300]/10 text-[#855300] hover:bg-[#855300] hover:text-white py-2.5 px-4 rounded-xl font-bold text-xs transition duration-200 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Edit className="w-4 h-4" />
                   Edit Info
@@ -558,46 +968,77 @@ export default function NewUIAccountPage() {
                   {addresses.map((addr) => (
                     <div
                       key={addr.id}
-                      className="border border-gray-100 rounded-2xl p-4 bg-gray-50/50 hover:bg-white hover:border-[#855300]/20 hover:shadow-sm transition duration-200 flex items-start gap-3 relative"
+                      className={`rounded-2xl p-4 transition-all duration-200 flex flex-col justify-between relative ${
+                        addr.is_default
+                          ? 'border-2 border-[#855300] bg-amber-50/20 shadow-sm'
+                          : 'border border-gray-200 bg-white hover:border-[#855300]/40 hover:shadow-xs'
+                      }`}
                     >
-                      <Home className="w-5 h-5 text-[#855300] mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-sm text-gray-800 leading-snug">
+                      {/* Top Header of Card */}
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                              addr.is_default
+                                ? 'bg-[#855300] text-white'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            <Home className="w-4 h-4" />
+                          </div>
+                          {addr.is_default && (
+                            <span className="inline-flex items-center gap-1 bg-[#855300] text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-xs">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                              Default Billing
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Delete Action */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAddress(addr.id)}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete address"
+                          aria-label="Delete address"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Address Lines */}
+                      <div className="space-y-1 mb-4 flex-1">
+                        <div className="font-bold text-sm text-gray-900 leading-snug">
                           {addr.address_line1}
                         </div>
                         {addr.address_line2 && (
-                          <div className="text-xs text-gray-500 mt-0.5">{addr.address_line2}</div>
+                          <div className="text-xs text-gray-600">{addr.address_line2}</div>
                         )}
-                        <div className="text-xs text-gray-500 mt-1">
-                          {addr.city}, {addr.state} - {addr.pincode}
+                        <div className="text-xs text-gray-600">
+                          {addr.city}, {addr.state} - <span className="font-semibold">{addr.pincode}</span>
                         </div>
-                        <div className="text-xs text-gray-400 font-semibold mt-2 flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
+                        <div className="text-xs text-gray-500 font-medium pt-1 flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-gray-400" />
                           {addr.phone}
                         </div>
                       </div>
 
-                      <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                      {/* Bottom Action Footer */}
+                      <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
                         {addr.is_default ? (
-                          <span className="bg-[#855300]/10 text-[#855300] text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                            Default
+                          <span className="text-xs font-semibold text-[#855300] flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#855300] animate-pulse"></span>
+                            Active Billing Address
                           </span>
                         ) : (
                           <button
                             type="button"
                             onClick={() => handleSetDefaultAddress(addr.id)}
-                            className="text-[10px] text-gray-400 hover:text-[#855300] underline font-semibold"
+                            className="inline-flex items-center text-xs font-bold text-gray-700 hover:text-[#855300] bg-white hover:bg-amber-50 border border-gray-300 hover:border-[#855300] px-3.5 py-1.5 rounded-xl shadow-xs transition-all duration-200 cursor-pointer active:scale-95"
                           >
-                            Set Default
+                            Set as Default
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteAddress(addr.id)}
-                          className="text-[10px] text-red-400 hover:text-red-600 font-semibold"
-                        >
-                          Delete
-                        </button>
                       </div>
                     </div>
                   ))}

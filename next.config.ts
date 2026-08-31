@@ -42,7 +42,10 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   async rewrites() {
-    const directusUrl = process.env.DIRECTUS_URL || 'http://localhost:8055';
+    let directusUrl = process.env.DIRECTUS_URL || 'http://localhost:8055';
+    if (directusUrl.includes('encender-backend') && process.env.NODE_ENV !== 'production') {
+      directusUrl = 'http://localhost:8055';
+    }
     return [
       {
         source: '/items/:path*',

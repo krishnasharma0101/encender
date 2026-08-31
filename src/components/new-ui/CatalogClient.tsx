@@ -7,6 +7,7 @@ import { fetchDirectusData } from '@/lib/fetchWithRetry';
 import { getAssetUrl, getCategorySlug } from '@/lib/directus';
 
 import { REAL_PRODUCTS } from '@/data/realProducts';
+import { addToCart } from '@/lib/cart';
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '') : '';
 
@@ -46,6 +47,8 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [addedId, setAddedId] = useState<string | null>(null);
+  const [toastProduct, setToastProduct] = useState<{ id: string; name: string } | null>(null);
 
   const [products, setProducts] = useState<any[]>(FORMATTED_REAL_PRODUCTS);
   const [loading, setLoading] = useState(false);
@@ -199,6 +202,20 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent, product: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(String(product.id), 1);
+    setAddedId(String(product.id));
+    setToastProduct({ id: String(product.id), name: product.name });
+    setTimeout(() => {
+      setAddedId((prev) => (prev === String(product.id) ? null : prev));
+    }, 1800);
+    setTimeout(() => {
+      setToastProduct((prev) => (prev?.id === String(product.id) ? null : prev));
+    }, 3500);
   };
 
   // Page title mapping based on selected category
@@ -484,8 +501,18 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
 
                     {/* Add to Cart Button */}
                     <div className="p-2.5 sm:p-4 pt-0">
-                      <button className="w-full bg-[#f59e0b] text-white hover:bg-[#d97706] transition-colors py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-2 shadow-xs">
-                        <span className="material-symbols-outlined text-xs sm:text-base">shopping_bag</span> Add to Cart
+                      <button
+                        onClick={(e) => handleAddToCart(e, product)}
+                        className={`w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-2 shadow-xs transition-all duration-300 cursor-pointer ${
+                          addedId === String(product.id)
+                            ? 'bg-emerald-600 text-white scale-[1.02] shadow-emerald-200'
+                            : 'bg-[#f59e0b] text-white hover:bg-[#d97706] active:scale-95'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-xs sm:text-base">
+                          {addedId === String(product.id) ? 'check_circle' : 'shopping_bag'}
+                        </span>
+                        {addedId === String(product.id) ? 'Added to Bag!' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>
@@ -543,6 +570,27 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
           )}
         </div>
       </main>
+
+      {/* Added to Cart Floating Toast Notification */}
+      {toastProduct && (
+        <div className="fixed bottom-6 right-4 sm:right-8 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300 max-w-sm">
+          <div className="bg-[#1a1c1a] text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 backdrop-blur-md">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-lg">check_circle</span>
+            </div>
+            <div className="flex-1 min-w-0 pr-2">
+              <p className="text-[11px] text-gray-400 font-medium leading-none mb-1">Added to Shopping Bag</p>
+              <p className="text-xs font-bold text-white truncate">{toastProduct.name}</p>
+            </div>
+            <Link
+              href="/cart"
+              className="bg-[#f59e0b] hover:bg-[#d97706] text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors shrink-0 shadow-xs"
+            >
+              View Bag
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Filter Bottom Sheet Drawer */}
       {mobileFilterOpen && (

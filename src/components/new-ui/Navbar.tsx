@@ -1,11 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const pathname = usePathname() || '';
+  const [cartCount, setCartCount] = useState<number>(0);
+
+  useEffect(() => {
+    const updateCount = () => {
+      if (typeof window === 'undefined') return;
+      try {
+        const stored = localStorage.getItem('cart');
+        const parsed = stored ? JSON.parse(stored) : [];
+        const total = parsed.reduce((sum: number, item: any) => sum + (Number(item.quantity) || 1), 0);
+        setCartCount(total);
+      } catch {
+        setCartCount(0);
+      }
+    };
+    updateCount();
+    window.addEventListener('cart-updated', updateCount);
+    window.addEventListener('storage', updateCount);
+    return () => {
+      window.removeEventListener('cart-updated', updateCount);
+      window.removeEventListener('storage', updateCount);
+    };
+  }, []);
 
   const navLinks = [
     { label: 'Gifting', href: '/category/gifting', match: ['/category/gifting', '/new-ui/category/gifting'] },
@@ -87,8 +109,13 @@ export default function Navbar() {
             <Link href="/account" className="hover:text-[#f59e0b] p-1.5 rounded-lg active:bg-gray-100" aria-label="User Account">
               <span className="material-symbols-outlined text-xl sm:text-2xl block">person</span>
             </Link>
-            <Link href="/cart" className="hover:text-[#f59e0b] p-1.5 rounded-lg active:bg-gray-100" aria-label="Cart">
+            <Link href="/cart" className="hover:text-[#f59e0b] p-1.5 rounded-lg active:bg-gray-100 relative" aria-label="Cart">
               <span className="material-symbols-outlined text-xl sm:text-2xl block">shopping_bag</span>
+              {cartCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 bg-[#f59e0b] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in duration-200 pointer-events-none">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>

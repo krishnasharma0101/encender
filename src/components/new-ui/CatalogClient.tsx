@@ -7,7 +7,7 @@ import { fetchDirectusData } from '@/lib/fetchWithRetry';
 import { getAssetUrl, getCategorySlug } from '@/lib/directus';
 
 import { REAL_PRODUCTS } from '@/data/realProducts';
-import { addToCart } from '@/lib/cart';
+import { addToCart, updateCartItemQuantity } from '@/lib/cart';
 import { getWishlist, toggleWishlist as toggleWishlistStorage } from '@/lib/wishlist';
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '') : '';
@@ -50,6 +50,7 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [addedId, setAddedId] = useState<string | null>(null);
   const [toastProduct, setToastProduct] = useState<{ id: string; name: string } | null>(null);
+  const [cartQuantities, setCartQuantities] = useState<Record<string, number>>({});
 
   const [products, setProducts] = useState<any[]>(FORMATTED_REAL_PRODUCTS);
   const [loading, setLoading] = useState(false);
@@ -124,6 +125,42 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
   // Handle wishlist toggle
   const toggleWishlist = (id: string) => {
     toggleWishlistStorage(id);
+  };
+
+  // Sync cart quantities from storage
+  useEffect(() => {
+    const syncCartQuantities = () => {
+      try {
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('cart') : null;
+        const parsed = stored ? JSON.parse(stored) : [];
+        const qtyMap: Record<string, number> = {};
+        if (Array.isArray(parsed)) {
+          parsed.forEach((item: any) => {
+            const qty = Number(item.quantity) || 0;
+            if (qty > 0) {
+              qtyMap[String(item.id)] = qty;
+            }
+          });
+        }
+        setCartQuantities(qtyMap);
+      } catch {
+        setCartQuantities({});
+      }
+    };
+
+    syncCartQuantities();
+    window.addEventListener('cart-updated', syncCartQuantities);
+    window.addEventListener('storage', syncCartQuantities);
+    return () => {
+      window.removeEventListener('cart-updated', syncCartQuantities);
+      window.removeEventListener('storage', syncCartQuantities);
+    };
+  }, []);
+
+  const handleUpdateQty = (e: React.MouseEvent, productId: string | number, delta: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateCartItemQuantity(productId, delta);
   };
 
   // Clear all active filters
@@ -519,21 +556,48 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
                       </div>
                     </div>
 
-                    {/* Add to Cart Button */}
+                    {/* Add to Cart / Quantity Stepper Button */}
                     <div className="p-2.5 sm:p-4 pt-0">
-                      <button
-                        onClick={(e) => handleAddToCart(e, product)}
-                        className={`w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-2 shadow-xs transition-all duration-300 cursor-pointer ${
-                          addedId === String(product.id)
-                            ? 'bg-emerald-600 text-white scale-[1.02] shadow-emerald-200'
-                            : 'bg-[#f59e0b] text-white hover:bg-[#d97706] active:scale-95'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-xs sm:text-base">
-                          {addedId === String(product.id) ? 'check_circle' : 'shopping_bag'}
-                        </span>
-                        {addedId === String(product.id) ? 'Added to Bag!' : 'Add to Cart'}
-                      </button>
+                      {cartQuantities[String(product.id)] ? (
+                        <div className="flex items-center justify-between bg-[#f59e0b] text-white rounded-lg sm:rounded-xl overflow-hidden shadow-xs h-[30px] sm:h-[38px]">
+                          <button
+                            type="button"
+                            onClick={(e) => handleUpdateQty(e, product.id, -1)}
+                            className="w-8 sm:w-10 h-full flex items-center justify-center hover:bg-[#d97706] active:bg-[#b45309] transition-colors font-bold cursor-pointer"
+                            aria-label="Decrease quantity"
+                          >
+                            <span className="material-symbols-outlined text-xs sm:text-base leading-none">remove</span>
+                          </button>
+                          
+                          <span className="font-bold text-[11px] sm:text-xs tracking-wider select-none px-1">
+                            {cartQuantities[String(product.id)]} in Bag
+                          </span>
+                          
+                          <button
+                            type="button"
+                            onClick={(e) => handleUpdateQty(e, product.id, 1)}
+                            className="w-8 sm:w-10 h-full flex items-center justify-center hover:bg-[#d97706] active:bg-[#b45309] transition-colors font-bold cursor-pointer"
+                            aria-label="Increase quantity"
+                          >
+                            <span className="material-symbols-outlined text-xs sm:text-base leading-none">add</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => handleAddToCart(e, product)}
+                          className={`w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 sm:gap-2 shadow-xs transition-all duration-300 cursor-pointer ${
+                            addedId === String(product.id)
+                              ? 'bg-emerald-600 text-white scale-[1.02] shadow-emerald-200'
+                              : 'bg-[#f59e0b] text-white hover:bg-[#d97706] active:scale-95'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-xs sm:text-base">
+                            {addedId === String(product.id) ? 'check_circle' : 'shopping_bag'}
+                          </span>
+                          {addedId === String(product.id) ? 'Added to Bag!' : 'Add to Cart'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

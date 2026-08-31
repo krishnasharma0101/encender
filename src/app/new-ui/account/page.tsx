@@ -5,6 +5,7 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Navbar from '@/components/new-ui/Navbar';
 import Modal from '@/components/Modal';
+import AuthScreen from '@/components/new-ui/AuthScreen';
 import { getAssetUrl } from '@/lib/directus';
 import {
   User,
@@ -378,6 +379,19 @@ export default function NewUIAccountPage() {
         month: 'short',
       })
     : 'N/A';
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-[#fbf9f6] flex items-center justify-center p-12 font-serif">
+        <div className="animate-pulse text-[#80182a] font-semibold text-base">
+          Loading account...
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <AuthScreen initialMode="signin" />;
+  }
 
   if (!profile) return null;
 

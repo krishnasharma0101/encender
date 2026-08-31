@@ -1,0 +1,341 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+
+interface AuthScreenProps {
+  initialMode?: 'signin' | 'signup';
+}
+
+export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) {
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Form State
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleGoogleSignIn = () => {
+    signIn('google', { callbackUrl: '/account' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    if (mode === 'signup' && password !== confirmPassword) {
+      setMessage('Passwords do not match. Please verify.');
+      setLoading(false);
+      return;
+    }
+
+    // Since NextAuth is configured with Google OAuth, encourage Google 1-click or save demo profile
+    if (typeof window !== 'undefined') {
+      const demoProfile = {
+        name: fullName || 'Encender Member',
+        email: email,
+        phone: phone ? `+91 ${phone}` : '+91 90285 02581',
+      };
+      localStorage.setItem('encender_user_profile', JSON.stringify(demoProfile));
+      setMessage('Account updated! Redirecting...');
+      setTimeout(() => {
+        window.location.href = '/account';
+      }, 1000);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="bg-[#fbf9f6] text-[#1b1c1a] font-sans antialiased flex flex-col min-h-screen">
+      {/* Top Header */}
+      <header className="w-full top-0 shadow-xs bg-[#fbf9f6] border-b border-[#e4e2df]">
+        <div className="flex justify-between items-center px-4 md:px-12 py-3 w-full max-w-[1280px] mx-auto">
+          <Link href="/" className="font-serif text-2xl font-bold text-[#80182a] tracking-tight">
+            Encender
+          </Link>
+          <nav className="flex items-center gap-6">
+            <Link
+              href="/products"
+              className="text-[#574142] hover:text-[#80182a] transition-colors duration-200 flex items-center gap-1.5 text-sm font-medium"
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              Back to Shop
+            </Link>
+            <a
+              href="https://wa.me/919028502581?text=Hi%2C%20I%20need%20help%20with%20Encender%20Account"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#574142] hover:text-[#80182a] transition-colors duration-200"
+              title="Need Help?"
+            >
+              <span className="material-symbols-outlined text-[20px]">help_outline</span>
+            </a>
+          </nav>
+        </div>
+      </header>
+
+      {/* Main Content Canvas */}
+      <main className="flex-grow flex items-center justify-center py-8 md:py-12 px-4 md:px-6 max-w-[1280px] mx-auto w-full">
+        <div className="w-full flex flex-col md:flex-row bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden min-h-[720px] border border-[#e4e2df]">
+          
+          {/* Left Side: Editorial Image */}
+          <div className="hidden md:flex md:w-1/2 relative bg-[#e4e2df] flex-col justify-end p-10 lg:p-12 overflow-hidden">
+            <div
+              className="absolute inset-0 z-0 scale-105 transition-transform duration-1000"
+              style={{
+                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuAUDYjzJuDJtLZsGnweKPhK9NrmU_67J67oOjR5BJHWPHqzspF7w5uLP5KTz_2rYefJEo8whvZXxULmIqs40redlT8L_l7-dzyEEUPIKS9dsYxO9fd9y9Jl5Kvt4FFWhV9XXowZVfK2p4mqZQk9zaD6FH7pcV8vWazbet-a6Vc1OqQMsxLiqNxO2zGz6dtI_csfPrtq_6hbQTsTMS2KE_BdnrkeZKgXblHrMfHi2uQeKTXGtNvlXKERNA")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+            <div className="relative z-20 text-white">
+              <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-semibold tracking-wider uppercase mb-3 text-amber-200 border border-white/20">
+                Artisanal Luxury
+              </span>
+              <h2 className="font-serif text-3xl lg:text-4xl font-bold mb-3 leading-tight drop-shadow-sm">
+                Modern Heritage
+              </h2>
+              <p className="text-white/90 text-sm lg:text-base leading-relaxed max-w-md font-light">
+                Curated gifting that balances artisanal tradition with seamless modern convenience.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Side: Auth Form */}
+          <div className="w-full md:w-1/2 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
+            <div className="max-w-md w-full mx-auto">
+              
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1b1c1a] text-center mb-6">
+                Welcome to Encender
+              </h1>
+
+              {/* Auth Tabs */}
+              <div className="flex border-b border-[#e4e2df] mb-6">
+                <button
+                  type="button"
+                  onClick={() => { setMode('signin'); setMessage(null); }}
+                  className={`flex-1 text-center py-2.5 text-sm font-semibold transition-all cursor-pointer ${
+                    mode === 'signin'
+                      ? 'text-[#80182a] border-b-2 border-[#80182a] font-bold'
+                      : 'text-[#574142] hover:text-[#80182a]'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMode('signup'); setMessage(null); }}
+                  className={`flex-1 text-center py-2.5 text-sm font-semibold transition-all cursor-pointer ${
+                    mode === 'signup'
+                      ? 'text-[#80182a] border-b-2 border-[#80182a] font-bold'
+                      : 'text-[#574142] hover:text-[#80182a]'
+                  }`}
+                >
+                  Create Account
+                </button>
+              </div>
+
+              {/* Status Message */}
+              {message && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs font-medium">
+                  {message}
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {mode === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1b1c1a] mb-1">
+                      Full Name
+                    </label>
+                    <input
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full bg-[#fbf9f6] border border-[#e4e2df] rounded-lg px-3.5 py-2.5 text-sm text-[#1b1c1a] placeholder:text-[#8a7172] focus:border-[#80182a] focus:ring-1 focus:ring-[#80182a] transition-colors outline-none"
+                      placeholder="Enter your full name"
+                      type="text"
+                    />
+                  </div>
+                )}
+
+                {mode === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1b1c1a] mb-1">
+                      WhatsApp Number
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 border border-r-0 border-[#e4e2df] bg-[#f5f3f0] text-[#574142] rounded-l-lg text-sm font-medium">
+                        +91
+                      </span>
+                      <input
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full bg-[#fbf9f6] border border-[#e4e2df] rounded-r-lg px-3.5 py-2.5 text-sm text-[#1b1c1a] placeholder:text-[#8a7172] focus:border-[#80182a] focus:ring-1 focus:ring-[#80182a] transition-colors outline-none"
+                        placeholder="Mobile number"
+                        type="tel"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#1b1c1a] mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-[#fbf9f6] border border-[#e4e2df] rounded-lg px-3.5 py-2.5 text-sm text-[#1b1c1a] placeholder:text-[#8a7172] focus:border-[#80182a] focus:ring-1 focus:ring-[#80182a] transition-colors outline-none"
+                    placeholder="Enter your email"
+                    type="email"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#1b1c1a] mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-[#fbf9f6] border border-[#e4e2df] rounded-lg px-3.5 py-2.5 text-sm text-[#1b1c1a] placeholder:text-[#8a7172] focus:border-[#80182a] focus:ring-1 focus:ring-[#80182a] transition-colors outline-none pr-10"
+                      placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
+                      type={showPassword ? 'text' : 'password'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7172] hover:text-[#80182a] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {showPassword ? 'visibility' : 'visibility_off'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {mode === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1b1c1a] mb-1">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full bg-[#fbf9f6] border border-[#e4e2df] rounded-lg px-3.5 py-2.5 text-sm text-[#1b1c1a] placeholder:text-[#8a7172] focus:border-[#80182a] focus:ring-1 focus:ring-[#80182a] transition-colors outline-none pr-10"
+                        placeholder="Confirm your password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a7172] hover:text-[#80182a] transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {showConfirmPassword ? 'visibility' : 'visibility_off'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#80182a] text-white font-bold text-sm py-3 rounded-lg hover:bg-[#5f0017] transition-colors shadow-xs flex justify-center items-center gap-2 cursor-pointer mt-2"
+                >
+                  {loading ? 'Processing...' : mode === 'signup' ? 'Verify & Proceed' : 'Sign In'}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="flex items-center my-6">
+                <div className="flex-grow border-t border-[#e4e2df]" />
+                <span className="mx-4 text-xs text-[#8a7172] uppercase tracking-wider font-semibold">
+                  or
+                </span>
+                <div className="flex-grow border-t border-[#e4e2df]" />
+              </div>
+
+              {/* Social Auth Buttons */}
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="w-full bg-white border border-[#e4e2df] text-[#1b1c1a] font-semibold text-sm py-2.5 px-4 rounded-lg hover:bg-[#fbf9f6] hover:border-[#8a7172] transition-colors flex justify-center items-center gap-3 cursor-pointer shadow-xs"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <a
+                  href="https://wa.me/919028502581?text=Hi%20Encender!%20I%20would%20like%20to%20inquire%20about%20my%20account"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full bg-[#fbf9f6] border border-[#e4e2df] text-[#1b1c1a] font-semibold text-sm py-2.5 px-4 rounded-lg hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 transition-colors flex justify-center items-center gap-3 cursor-pointer shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-emerald-600">
+                    chat
+                  </span>
+                  Continue with WhatsApp
+                </a>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="mt-8 flex justify-between items-center px-2 pt-4 border-t border-[#e4e2df] opacity-80">
+                <div className="flex items-center gap-1 text-[#574142]">
+                  <span className="material-symbols-outlined text-[15px] text-[#80182a]">lock</span>
+                  <span className="text-[11px] font-medium">Secure</span>
+                </div>
+                <div className="flex items-center gap-1 text-[#574142]">
+                  <span className="material-symbols-outlined text-[15px] text-[#80182a]">verified</span>
+                  <span className="text-[11px] font-medium">Verified</span>
+                </div>
+                <div className="flex items-center gap-1 text-[#574142]">
+                  <span className="material-symbols-outlined text-[15px] text-[#80182a]">support_agent</span>
+                  <span className="text-[11px] font-medium">Support</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+}

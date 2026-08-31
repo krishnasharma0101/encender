@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { Heart } from 'lucide-react';
 import Navbar from '@/components/new-ui/Navbar';
 import { fetchDirectusData } from '@/lib/fetchWithRetry';
 import { getAssetUrl, getCategorySlug } from '@/lib/directus';
@@ -520,15 +521,20 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
                           e.stopPropagation();
                           toggleWishlist(product.id);
                         }}
-                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center backdrop-blur-sm shadow-xs transition-colors ${
+                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center backdrop-blur-sm shadow-xs transition-all duration-200 cursor-pointer group/btn ${
                           wishlist[product.id]
-                            ? 'bg-red-50 text-red-500'
-                            : 'bg-white/80 text-gray-600 hover:text-[#855300]'
+                            ? 'bg-white text-red-500 shadow-sm'
+                            : 'bg-white/80 text-gray-500 hover:text-red-500 hover:bg-white'
                         }`}
+                        aria-label={wishlist[product.id] ? 'Remove from wishlist' : 'Add to wishlist'}
                       >
-                        <span className="material-symbols-outlined text-xs sm:text-sm">
-                          {wishlist[product.id] ? 'favorite' : 'favorite_border'}
-                        </span>
+                        <Heart
+                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 ${
+                            wishlist[product.id]
+                              ? 'fill-red-500 text-red-500 scale-110'
+                              : 'text-gray-500 group-hover/btn:text-red-500'
+                          }`}
+                        />
                       </button>
                     </Link>
 

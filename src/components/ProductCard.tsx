@@ -153,12 +153,13 @@ export default function ProductCard({ product, onAddToCart, onAddToWishlist }: P
       {/* Wishlist Button */}
       <button
         onClick={handleWishlistToggle}
-        className={`absolute top-2 right-2 p-2 rounded-full transition-all duration-200 z-10 ${isWishlisted
-            ? 'bg-red-500 text-white'
+        className={`absolute top-2 right-2 p-2 rounded-full transition-all duration-200 z-10 ${
+          isWishlisted
+            ? 'bg-white text-red-500 shadow-sm'
             : 'bg-white/80 text-gray-800 hover:bg-white hover:text-red-500'
-          }`}
+        }`}
       >
-        <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
+        <Heart className={`h-4 w-4 transition-transform duration-200 ${isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''}`} />
       </button>
 
       {/* Quick Action Button — slides up from bottom of entire card on hover */}

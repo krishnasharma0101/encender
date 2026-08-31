@@ -569,8 +569,8 @@ export default function CatalogClient({ initialCategory = 'all' }: CatalogClient
                             <span className="material-symbols-outlined text-xs sm:text-base leading-none">remove</span>
                           </button>
                           
-                          <span className="font-bold text-[11px] sm:text-xs tracking-wider select-none px-1">
-                            {cartQuantities[String(product.id)]} in Bag
+                          <span className="font-bold text-xs sm:text-sm tracking-wider select-none px-2 text-center min-w-[24px]">
+                            {cartQuantities[String(product.id)]}
                           </span>
                           
                           <button

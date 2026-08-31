@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/new-ui/Navbar';
-import Footer from '@/components/Footer';
 import { getAssetUrl } from '@/lib/directus';
 import { addToCart } from '@/lib/cart';
 import { getWishlist, removeFromWishlist, clearWishlist } from '@/lib/wishlist';
@@ -162,18 +161,6 @@ export default function WishlistClient() {
       <Navbar />
 
       <main className="max-w-[1280px] mx-auto px-4 md:px-10 py-8 flex-grow w-full">
-        {/* Breadcrumb Navigation */}
-        <nav className="text-xs text-gray-500 mb-6 flex items-center gap-2">
-          <Link href="/" className="hover:text-black transition-colors">
-            Home
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-          <Link href="/account" className="hover:text-black transition-colors">
-            My Account
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-          <span className="text-black font-semibold">Wishlist</span>
-        </nav>
 
         {/* Page Header */}
         <div className="mb-8 text-center md:text-left">
@@ -354,7 +341,43 @@ export default function WishlistClient() {
         )}
       </main>
 
-      <Footer />
+      {/* Footer matching existing New UI design */}
+      <footer className="bg-[#2f312f] text-white py-12 px-6 md:px-10 mt-auto">
+        <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-start gap-8 font-sans-body">
+          <div className="flex flex-col gap-3">
+            <span className="font-serif-heading text-2xl font-bold text-[#ffddb8]">Encender</span>
+            <p className="text-sm text-gray-300">© 2026 Encender. Crafted with Heritage across India.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 w-full md:w-auto text-sm text-gray-300">
+            <div className="flex flex-col gap-2">
+              <Link href="/shipping" className="hover:text-white transition-colors">
+                Shipping Policy
+              </Link>
+              <Link href="/refunds" className="hover:text-white transition-colors">
+                Refunds
+              </Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Link href="/terms" className="hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/contact" className="hover:text-white transition-colors">
+                Contact Us
+              </Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              <a
+                href="https://wa.me/919028502581"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-white transition-colors text-[#f59e0b] font-medium"
+              >
+                WhatsApp Support
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -161,8 +161,8 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
       </header>
 
       {/* Main Content Canvas */}
-      <main className="flex-grow flex items-center justify-center py-8 md:py-12 px-4 md:px-6 max-w-[1180px] mx-auto w-full">
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 items-center">
+      <main className="flex-grow flex items-start justify-center py-8 md:py-12 px-4 md:px-6 max-w-[1180px] mx-auto w-full">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 items-start">
           
           {/* Left Column: Stable Editorial Image Card (Separated & Fixed Shape) */}
           <div className="hidden md:flex relative rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#e4e2df] h-[640px] flex-col justify-end p-8 lg:p-10 bg-[#e4e2df]">

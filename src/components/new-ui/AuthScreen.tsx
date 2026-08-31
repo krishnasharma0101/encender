@@ -161,36 +161,33 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
       </header>
 
       {/* Main Content Canvas */}
-      <main className="flex-grow flex items-center justify-center py-8 md:py-12 px-4 md:px-6 max-w-[1280px] mx-auto w-full">
-        <div className="w-full flex flex-col md:flex-row bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden min-h-[720px] border border-[#e4e2df]">
+      <main className="flex-grow flex items-center justify-center py-8 md:py-12 px-4 md:px-6 max-w-[1180px] mx-auto w-full">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 items-center">
           
-          {/* Left Side: Editorial Image */}
-          <div className="hidden md:flex md:w-1/2 relative bg-[#e4e2df] flex-col justify-end p-10 lg:p-12 overflow-hidden">
-            <div
-              className="absolute inset-0 z-0 scale-105 transition-transform duration-1000"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuAUDYjzJuDJtLZsGnweKPhK9NrmU_67J67oOjR5BJHWPHqzspF7w5uLP5KTz_2rYefJEo8whvZXxULmIqs40redlT8L_l7-dzyEEUPIKS9dsYxO9fd9y9Jl5Kvt4FFWhV9XXowZVfK2p4mqZQk9zaD6FH7pcV8vWazbet-a6Vc1OqQMsxLiqNxO2zGz6dtI_csfPrtq_6hbQTsTMS2KE_BdnrkeZKgXblHrMfHi2uQeKTXGtNvlXKERNA")`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center',
-              }}
+          {/* Left Column: Stable Editorial Image Card (Separated & Fixed Shape) */}
+          <div className="hidden md:flex relative rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#e4e2df] h-[640px] flex-col justify-end p-8 lg:p-10 bg-[#e4e2df]">
+            <img
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUDYjzJuDJtLZsGnweKPhK9NrmU_67J67oOjR5BJHWPHqzspF7w5uLP5KTz_2rYefJEo8whvZXxULmIqs40redlT8L_l7-dzyEEUPIKS9dsYxO9fd9y9Jl5Kvt4FFWhV9XXowZVfK2p4mqZQk9zaD6FH7pcV8vWazbet-a6Vc1OqQMsxLiqNxO2zGz6dtI_csfPrtq_6hbQTsTMS2KE_BdnrkeZKgXblHrMfHi2uQeKTXGtNvlXKERNA"
+              alt="Encender Modern Heritage"
+              className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent z-10" />
             <div className="relative z-20 text-white">
               <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-semibold tracking-wider uppercase mb-3 text-amber-200 border border-white/20">
                 Artisanal Luxury
               </span>
-              <h2 className="font-serif text-3xl lg:text-4xl font-bold mb-3 leading-tight drop-shadow-sm">
+              <h2 className="font-serif text-3xl font-bold mb-2 leading-tight drop-shadow-sm">
                 Modern Heritage
               </h2>
-              <p className="text-white/90 text-sm lg:text-base leading-relaxed max-w-md font-light">
+              <p className="text-white/90 text-sm leading-relaxed max-w-sm font-light">
                 Curated gifting that balances artisanal tradition with seamless modern convenience.
               </p>
             </div>
           </div>
 
-          {/* Right Side: Auth Form */}
-          <div className="w-full md:w-1/2 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
-            <div className="max-w-md w-full mx-auto">
+          {/* Right Column: Auth Form (Separate White Box) */}
+          <div className="w-full bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#e4e2df] p-6 sm:p-10 flex flex-col justify-center max-w-md mx-auto md:max-w-none">
+            <div className="w-full">
               
               <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1b1c1a] text-center mb-6">
                 Welcome to Encender

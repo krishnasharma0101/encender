@@ -12,7 +12,7 @@ export default function CollectionsPage() {
       colSpan: 'md:col-span-8',
       height: 'h-[360px] md:h-[500px]',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1UZD5-U-CnnArxetvAb3ANq1iVPHIYIhK-5wzjIL-XeCAmWc3n5jojDOMKkXbt84djJi9w3qiZMlXaGs-S7u1P0H4t2APCoPbAo-Dl6WwG7krry2EbKQv_ezIyOf0M4YUZfsFD-_ysUX3PhRO_f6zUr13Dj_mxPmK6L0NT1nONK_aNFPtKbwclxIkVmnpTLm3rnolI3EJ9fT6jGm-Xy7IDr9c1GlGtYWXyghgaKkw6GPfdFImd2sQnCYA',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuDpCdUz3nNrDuitIxxr6pPfLlI6Iuo4BG16a6CeUlqQntfCSpwyX9uHm92YCGHlGr_ZSek3K6Buu4wZYVkBixJpizbJxDKb3n8R_G29hnZ8TgYtWzOeH9Z287W9mJQxh-RexwMdgNc0GUAZ-fAHj7-ZP2fd10a6ftY5_tsrS8guiJqUKR1ukD901p0O-k2Q988BjTYW6d692-joRvbrlUwUJbqwcQG1pwl_bxXtqFl1uj6_tG46Q4ETrQ',
       link: '/new-ui/category/jewellery',
     },
     {
@@ -20,7 +20,7 @@ export default function CollectionsPage() {
       colSpan: 'md:col-span-4',
       height: 'h-[360px] md:h-[500px]',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1UmgPNajBMpZB8L0xsQ3L4kei3hPCLMWz6bpTJmcCTfMMT2XfrvHyP-jOTNmMNWTxle2ux34KA6VsTLGk1vCke0hmwHz27qpp78n9tZGxEK9BbYjqZ7o7Z6sRsJfkgbHv5ZCxXk6E3zI1wXTcq59n5ul4XbaehmOfn_j6YC5Czxu0JApuSw8LcO7kjhNqMVkTWWpkej0V-Fk_30ugWpn6LzUDe3vcNAMTqaZlJkIj0gQCBtb6tVtSPClQ',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuCE6Zz_4Gul2SLE9RUQe0dPo86tZKIyFO-oJvsXh4UxbEgqQcWtQNNt9z4d-pG9P7EnKEiqN-1dwuaybtyFPSzIf2V9pHUE1xpWtXUFfXOd54SE9euVxXyNjHD3gJNPmrCMtYAS4Y2zxkjfxiaSRDbbmumOBe1e4F8VnIWhZtUIIjcoyva_Bi_CdoYqBWLQsPvXO97rf1FjwC4RM3tFYUbQQo4JLTKKN1GGlPbcYA9i_jsAjDz4rGZAcQ',
       link: '/new-ui/category/pooja-essentials',
     },
     {
@@ -29,7 +29,7 @@ export default function CollectionsPage() {
       colSpan: 'md:col-span-4',
       height: 'h-[360px]',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1UnRiuDey5hsZj80Qh7lgLxq8lixWqKzG5FkTtRdua_dhP3GfE903R86f2xO9kK3E644ROnOYth9DrtPlQvOP1pRiYlduCdNW6rslfol62TJNHm0ucgKZk7qnFPBYl7g0678o1YotU2uWNSNERjdewDUz_em4l02Rgyo9csjYVgx6UxGzikpKX7Rj2qepdVMdFjb-dNZxcE_2OTpcxE1_SY80stcI-deAOc5GcYBgdZKvRe2pQcgItYo1s',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuBUxFuIudJKEj8aJ0gw1v92zxjFAZktD3COt7_plxoHQQ9N_q54pOSdf4U_3sA_yyvR4uVIR7MB1uAvtavF1GSeuaYZDldNa1kx_9u0VXZIqwb8PMeUzeROZ6iBfBew5ks_ZcziQlnzLm7pehLBID0p9YF0njy2LMgAn8C69OO8dHMMFpRTPMavRlrlw9EyFmMZ4VYzkC5HXG94qrCDt1NGyLG5VtsciruaZGnApAfKQfB2IBL3GDZO',
       link: '/new-ui/category/gifting',
     },
     {
@@ -37,7 +37,7 @@ export default function CollectionsPage() {
       colSpan: 'md:col-span-4',
       height: 'h-[360px]',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1UxW4VbLo-d4Y4RTpn0EW35QBeITW6nXzUZHVa7q_9XtNTa7Mc7NluKBeg03jM5NGjfP1PTWQhnPsU3nxdVQ7xC23KD0DrSJ4nCuKfZNq3Bi8AyaOjX3iuALKS4z5aLP97vFUWV-YE_ck48-TghCWFdft-mkIc4RAKLNbw6ZbLrIJbdHEII8OcGvqIF88bThupgZWP4rDE2ZLkisMQVls5ieurc4919muB5KU9SvwXnlyX81Us2M2PTbQ',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuCoZ7ew2_iXT_r50Z8-BaLO4APsBHL9V4F6PACGsFxNZkIDzShsXqS3--WQSrkDb9vgTkDBfyJuq_I0O2ATzalVsDGG0kuGHctUI_zRdEgcjCnKO_LOuuPo29XEAnDELHr0ovkwE3igmye933ad1wJ2EAGTEgm_m9XKwjWKbv3F1Vb8-6-DyryQAGAg8mr9kkucjK2THDA4D_1ekBWlVw4EG-9WwdeSEsM8zeWt2Nok66vFmJuPaAaCaQ',
       link: '/new-ui/category/interior',
     },
     {
@@ -45,7 +45,7 @@ export default function CollectionsPage() {
       colSpan: 'md:col-span-4',
       height: 'h-[360px]',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1VhRWgCvbO7n5NmnNJNXAb0tTW9IhVr7n0K1DOTgJ-ciL_PCBO_bLdBZaCXb9bPGHuHgfbvp3gL1OdFEncJKHZx8M7k8az1t99uGfgJIJ1ENDdKTBKfj46FHiMlF5StUfrFx6KAZAyJ-s_hSXRFiKQFTwayraQFQMEv_jczcBwbkEDL9gVBb3QEcZe2MkJeNTaFrnqyFMTbd-DpGB0IAfUDtbN155Dt25Uf9hIDxc1by5SIrv_w81_DiMk',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuBUPT9hLBbjN47f2mOlKIx2Tl0Pw_qL2_iJ9snERcGZqjfs8_2IYJV5_tl0slLDRPESsIlFzda4HfPbnLlDJjPd6KYQDkEdQf9_d0ibv6gw8DpsQ7S8av_Txg9bijntDzbAriszbPqx52NPA6aBE0kkjh7wic9CTKHsOkxmk9KnNIH7RAXCCa7FHItlqApdQGk16Ef2-OG8OgxSV-FdJ7-Ii3J_3sDVz0WO6IwwD2qRYslu6K2Gn4DrGQ',
       link: '/new-ui/category/daily-essentials',
     },
   ];

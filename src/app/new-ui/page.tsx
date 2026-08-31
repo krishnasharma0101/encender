@@ -12,19 +12,19 @@ export default function NewUIPage() {
     {
       name: 'Daily Essentials',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1VwAHGtVDmUvC3qtRK9bNrVPL1JdfNm7ap-WhcPoXjOmhhhoJPdspOsrUB-J7W88WE18OQtHYdEti4lUB3-bOfi7nqsBA4dq3xlHPcQIMzBzyM9cceuswrqIXbRcM--vJt5AH-0PqSc2VwPMxbS_OY12DddDahWR_Srp6lYB1rFDt6WCn1qfXW1VrUMohgmjLKRNwdLfNUuhhVMtPSm2Gd6U_6lpQ5IQ6L0yKUg-TJFG1JQmsMqetHDDDI',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuBUPT9hLBbjN47f2mOlKIx2Tl0Pw_qL2_iJ9snERcGZqjfs8_2IYJV5_tl0slLDRPESsIlFzda4HfPbnLlDJjPd6KYQDkEdQf9_d0ibv6gw8DpsQ7S8av_Txg9bijntDzbAriszbPqx52NPA6aBE0kkjh7wic9CTKHsOkxmk9KnNIH7RAXCCa7FHItlqApdQGk16Ef2-OG8OgxSV-FdJ7-Ii3J_3sDVz0WO6IwwD2qRYslu6K2Gn4DrGQ',
       link: '/new-ui/category/daily-essentials',
     },
     {
       name: 'Back to School',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1U2EOvKs8APGmvsIrnlZA4s9sSR80FG1taCdBALi9P32hBlTmzfrNjaQs57mTWSZUxWpC45HFaiQvm3VAdUu7XjURNaiR5RjRehMjimzsK97gTs8t8D4BmnGXqI_Fp6Yq6omuWuZeZXGS0AmxW74WrLojxXrtOeDHNIHvuyKLkNLqa1EuIcXoeKnr9QM04lTaAhjdfMkMBl6HeUp6ssCkXpxPWTbyxktTODn9dDTgow171sxJypl8_HRmo',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuBUxFuIudJKEj8aJ0gw1v92zxjFAZktD3COt7_plxoHQQ9N_q54pOSdf4U_3sA_yyvR4uVIR7MB1uAvtavF1GSeuaYZDldNa1kx_9u0VXZIqwb8PMeUzeROZ6iBfBew5ks_ZcziQlnzLm7pehLBID0p9YF0njy2LMgAn8C69OO8dHMMFpRTPMavRlrlw9EyFmMZ4VYzkC5HXG94qrCDt1NGyLG5VtsciruaZGnApAfKQfB2IBL3GDZO',
       link: '/new-ui/category/back-to-school',
     },
     {
       name: 'Interior',
       image:
-        'https://lh3.googleusercontent.com/aida/AEtjO1WzSrCSEOUuKgkIgYfVgM4jYnUv3AQiIK4bQz-_le5bTOk-jJRYiAn51wBy1EYPdaUmv547THUfvC19_vmpyjr3o2Av8SPQqqblCYOTvqWx8Q3DHGFlcS8zQTTvIWC5t1QPOXKVqOY5Be2ZrruGVo2-vHMTea5GpQ-7H5sqjy5RUwSsytf-y5Lgcgj9HHS6Alk9tJGACz51NfyK_gUalLMQ_j7oxuNfytK9xGPcFgQJwV4cqUTzw2GKPw',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuCoZ7ew2_iXT_r50Z8-BaLO4APsBHL9V4F6PACGsFxNZkIDzShsXqS3--WQSrkDb9vgTkDBfyJuq_I0O2ATzalVsDGG0kuGHctUI_zRdEgcjCnKO_LOuuPo29XEAnDELHr0ovkwE3igmye933ad1wJ2EAGTEgm_m9XKwjWKbv3F1Vb8-6-DyryQAGAg8mr9kkucjK2THDA4D_1ekBWlVw4EG-9WwdeSEsM8zeWt2Nok66vFmJuPaAaCaQ',
       link: '/new-ui/category/interior',
     },
     {

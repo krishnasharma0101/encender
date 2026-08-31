@@ -13,6 +13,10 @@ import {
   EyeOff,
 } from 'lucide-react';
 
+const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL
+  ? process.env.NEXT_PUBLIC_DIRECTUS_URL.replace(/\/$/, '')
+  : '';
+
 interface AuthScreenProps {
   initialMode?: 'signin' | 'signup';
 }
@@ -40,25 +44,91 @@ export default function AuthScreen({ initialMode = 'signup' }: AuthScreenProps) 
     setLoading(true);
     setMessage(null);
 
-    if (mode === 'signup' && password !== confirmPassword) {
-      setMessage('Passwords do not match. Please verify.');
-      setLoading(false);
-      return;
-    }
+    const cleanEmail = email.trim().toLowerCase();
 
-    if (typeof window !== 'undefined') {
-      const demoProfile = {
-        name: fullName || 'Encender Member',
-        email: email,
-        phone: phone ? `+91 ${phone}` : '+91 90285 02581',
-      };
-      localStorage.setItem('encender_user_profile', JSON.stringify(demoProfile));
-      setMessage('Account registered! Redirecting...');
-      setTimeout(() => {
-        window.location.href = '/account';
-      }, 1000);
+    if (mode === 'signup') {
+      if (password !== confirmPassword) {
+        setMessage('Passwords do not match. Please verify.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // 1. Check if email already exists in Directus database
+        const checkRes = await fetch(
+          `${DIRECTUS_URL}/items/user?filter[email][_eq]=${encodeURIComponent(cleanEmail)}`
+        );
+        const checkJson = await checkRes.json();
+        if (Array.isArray(checkJson?.data) && checkJson.data.length > 0) {
+          setMessage('An account with this email already exists. Please sign in.');
+          setMode('signin');
+          setLoading(false);
+          return;
+        }
+
+        // 2. Format phone number
+        const cleanPhone = phone.trim();
+        const formattedPhone = cleanPhone.startsWith('+') ? cleanPhone : `+91 ${cleanPhone}`;
+
+        // 3. Save new user into Directus database
+        const createRes = await fetch(`${DIRECTUS_URL}/items/user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: fullName.trim(),
+            email: cleanEmail,
+            phone: formattedPhone,
+            created_at: new Date().toISOString(),
+          }),
+        });
+
+        const createJson = await createRes.json();
+        if (!createRes.ok || !createJson?.data) {
+          throw new Error(createJson?.errors?.[0]?.message || 'Failed to save account in database.');
+        }
+
+        const newUser = createJson.data;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('encender_user_profile', JSON.stringify(newUser));
+        }
+
+        setMessage('Account created successfully! Redirecting...');
+        setTimeout(() => {
+          window.location.href = '/account';
+        }, 800);
+      } catch (err: any) {
+        setMessage(err.message || 'Error connecting to database. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // mode === 'signin'
+      try {
+        const checkRes = await fetch(
+          `${DIRECTUS_URL}/items/user?filter[email][_eq]=${encodeURIComponent(cleanEmail)}`
+        );
+        const checkJson = await checkRes.json();
+        if (!Array.isArray(checkJson?.data) || checkJson.data.length === 0) {
+          setMessage('No account found with this email. Please click "Create Account" to register.');
+          setLoading(false);
+          return;
+        }
+
+        const foundUser = checkJson.data[0];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('encender_user_profile', JSON.stringify(foundUser));
+        }
+
+        setMessage('Signed in successfully! Redirecting...');
+        setTimeout(() => {
+          window.location.href = '/account';
+        }, 800);
+      } catch (err: any) {
+        setMessage(err.message || 'Error connecting to database. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
-    setLoading(false);
   };
 
   return (

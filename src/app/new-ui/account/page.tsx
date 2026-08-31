@@ -54,7 +54,7 @@ const INITIAL_GUEST_PROFILE = {
 
 export default function NewUIAccountPage() {
   const { data: session, status } = useSession();
-  const [profile, setProfile] = useState<Record<string, unknown> | null>(INITIAL_GUEST_PROFILE);
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
   const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,56 +73,39 @@ export default function NewUIAccountPage() {
   useEffect(() => {
     if (status === 'loading') return;
 
-    // If not logged in with NextAuth, load guest/local demo profile smoothly
+    // If not logged in with NextAuth, check stored Directus user profile
     if (!session) {
-      const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('encender_user_profile') : null;
-      let finalProfile = INITIAL_GUEST_PROFILE;
+      const savedProfile =
+        typeof window !== 'undefined' ? localStorage.getItem('encender_user_profile') : null;
       if (savedProfile) {
         try {
-          finalProfile = { ...INITIAL_GUEST_PROFILE, ...JSON.parse(savedProfile) };
+          const parsed = JSON.parse(savedProfile);
+          if (parsed && parsed.id && !String(parsed.id).startsWith('guest')) {
+            setProfile(parsed);
+            setEditProfile({
+              name: (parsed.name as string) || '',
+              phone: (parsed.phone as string) || '',
+              address: (parsed.address as string) || '',
+              city: (parsed.city as string) || '',
+              state: (parsed.state as string) || '',
+              zip: (parsed.zip as string) || '',
+              country: (parsed.country as string) || 'India',
+            });
+            // Fetch real user orders & addresses from Directus
+            fetch(`${DIRECTUS_URL}/items/orders?filter[users][_eq]=${parsed.id}&sort=-created_at`)
+              .then((r) => r.json())
+              .then((j) => setOrders(j.data || []))
+              .catch(() => setOrders([]));
+            fetch(`${DIRECTUS_URL}/items/addresses?filter[user][_eq]=${parsed.id}`)
+              .then((r) => r.json())
+              .then((j) => setAddresses(j.data || []))
+              .catch(() => setAddresses([]));
+            setLoading(false);
+            return;
+          }
         } catch {}
       }
-      setProfile(finalProfile);
-      setEditProfile({
-        name: (finalProfile.name as string) || 'Guest Member',
-        phone: (finalProfile.phone as string) || '+91 90285 02581',
-        address: (finalProfile.address as string) || '',
-        city: (finalProfile.city as string) || '',
-        state: (finalProfile.state as string) || '',
-        zip: (finalProfile.zip as string) || '',
-        country: (finalProfile.country as string) || 'India',
-      });
-      setOrders([]);
-      const savedAddrs = typeof window !== 'undefined' ? localStorage.getItem('encender_user_addresses') : null;
-      if (savedAddrs) {
-        try {
-          setAddresses(JSON.parse(savedAddrs));
-        } catch {
-          setAddresses([
-            {
-              id: 'addr-1',
-              address_line1: '101 Heritage Villa, Park Avenue',
-              city: 'Mumbai',
-              state: 'Maharashtra',
-              pincode: '400001',
-              phone: '+91 90285 02581',
-              is_default: true,
-            },
-          ]);
-        }
-      } else {
-        setAddresses([
-          {
-            id: 'addr-1',
-            address_line1: '101 Heritage Villa, Park Avenue',
-            city: 'Mumbai',
-            state: 'Maharashtra',
-            pincode: '400001',
-            phone: '+91 90285 02581',
-            is_default: true,
-          },
-        ]);
-      }
+      setProfile(null);
       setLoading(false);
       return;
     }
@@ -389,7 +372,11 @@ export default function NewUIAccountPage() {
     );
   }
 
-  if (!session) {
+  const hasLoggedInUser = Boolean(
+    session?.user || (profile?.id && !String(profile.id).startsWith('guest'))
+  );
+
+  if (!hasLoggedInUser) {
     return <AuthScreen initialMode="signin" />;
   }
 

@@ -17,8 +17,7 @@ export default function NewUIPage() {
     },
     {
       name: 'Back to School',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBUxFuIudJKEj8aJ0gw1v92zxjFAZktD3COt7_plxoHQQ9N_q54pOSdf4U_3sA_yyvR4uVIR7MB1uAvtavF1GSeuaYZDldNa1kx_9u0VXZIqwb8PMeUzeROZ6iBfBew5ks_ZcziQlnzLm7pehLBID0p9YF0njy2LMgAn8C69OO8dHMMFpRTPMavRlrlw9EyFmMZ4VYzkC5HXG94qrCDt1NGyLG5VtsciruaZGnApAfKQfB2IBL3GDZO',
+      image: '/backtoschool.jpg',
       link: '/new-ui/category/back-to-school',
     },
     {

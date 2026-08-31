@@ -135,7 +135,7 @@ export default function CollectionsPage() {
             >
               <div className="w-full md:w-1/2 h-[260px] md:h-[380px] relative overflow-hidden">
                 <img
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1U2EOvKs8APGmvsIrnlZA4s9sSR80FG1taCdBALi9P32hBlTmzfrNjaQs57mTWSZUxWpC45HFaiQvm3VAdUu7XjURNaiR5RjRehMjimzsK97gTs8t8D4BmnGXqI_Fp6Yq6omuWuZeZXGS0AmxW74WrLojxXrtOeDHNIHvuyKLkNLqa1EuIcXoeKnr9QM04lTaAhjdfMkMBl6HeUp6ssCkXpxPWTbyxktTODn9dDTgow171sxJypl8_HRmo"
+                  src="/backtoschool.jpg"
                   alt="Kids & Back to School"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
